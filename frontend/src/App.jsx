@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';
 import TipPageView from './components/TipPageView';
+import KYCUBIView from './components/KYCUBIView';
+import SpotlightView from './components/SpotlightView';
 
 const BACKEND_URL = 'http://localhost:5001';
 
@@ -64,6 +66,10 @@ export default function App() {
           setView('preview');
         } else if (hash === '#/how-it-works') {
           setView('how-it-works');
+        } else if (hash === '#/kyc-ubi') {
+          setView('kyc-ubi');
+        } else if (hash === '#/spotlight') {
+          setView('spotlight');
         } else {
           setView('dashboard');
         }
@@ -265,6 +271,14 @@ export default function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {currentView === 'kyc-ubi' && (
+          <KYCUBIView />
+        )}
+
+        {currentView === 'spotlight' && (
+          <SpotlightView />
         )}
       </main>
 

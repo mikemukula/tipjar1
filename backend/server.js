@@ -21,8 +21,123 @@ const initialData = {
     username: 'nuwayama',
     bio: 'Sharing authentic Ugandan food recipes from Kampala. Your G$ tips help buy fresh local ingredients!',
     youtube: 'https://youtube.com/c/nuwayama',
-    twitter: 'https://twitter.com/nuwayama'
+    twitter: 'https://twitter.com/nuwayama',
+    instagram: 'https://instagram.com/nuwayama'
   },
+  creators: [
+    {
+      rank: 1,
+      name: 'Nuwayama',
+      username: 'nuwayama',
+      bio: 'Sharing authentic Ugandan food recipes from Kampala',
+      totalTips: 175,
+      tipCount: 3,
+      avatar: '🍳',
+      social: {
+        youtube: 'https://youtube.com/c/nuwayama',
+        twitter: 'https://twitter.com/nuwayama',
+        instagram: 'https://instagram.com/nuwayama'
+      }
+    },
+    {
+      rank: 2,
+      name: 'Alex Rivera',
+      username: 'alexrivera',
+      bio: 'Digital artist creating NFT illustrations on Celo blockchain',
+      totalTips: 450,
+      tipCount: 8,
+      avatar: '🎨',
+      social: {
+        youtube: 'https://youtube.com/alexrivera',
+        twitter: 'https://twitter.com/alexrivera',
+        instagram: 'https://instagram.com/alexrivera_art'
+      }
+    },
+    {
+      rank: 3,
+      name: 'Sarah Chen',
+      username: 'sarahchen',
+      bio: 'Web3 educator teaching blockchain to beginners',
+      totalTips: 320,
+      tipCount: 12,
+      avatar: '📚',
+      social: {
+        youtube: 'https://youtube.com/sarahchen',
+        twitter: 'https://twitter.com/sarahchen_web3',
+        instagram: 'https://instagram.com/sarahchen.web3'
+      }
+    },
+    {
+      rank: 4,
+      name: 'Marcus Johnson',
+      username: 'marcusj',
+      bio: 'Musician streaming live jam sessions daily',
+      totalTips: 280,
+      tipCount: 15,
+      avatar: '🎵',
+      social: {
+        youtube: 'https://youtube.com/marcusj',
+        twitter: 'https://twitter.com/marcusjams',
+        instagram: 'https://instagram.com/marcus.johnson.music'
+      }
+    },
+    {
+      rank: 5,
+      name: 'Elena Rodriguez',
+      username: 'elenarod',
+      bio: 'Sustainable fashion designer from Costa Rica',
+      totalTips: 215,
+      tipCount: 7,
+      avatar: '👗',
+      social: {
+        youtube: 'https://youtube.com/elenarod',
+        twitter: 'https://twitter.com/erodriguez_eco',
+        instagram: 'https://instagram.com/elena_sustainable_fashion'
+      }
+    },
+    {
+      rank: 6,
+      name: 'James Liu',
+      username: 'jamesliu',
+      bio: 'DeFi protocol developer sharing technical insights',
+      totalTips: 380,
+      tipCount: 11,
+      avatar: '⚙️',
+      social: {
+        youtube: 'https://youtube.com/jamesliu_dev',
+        twitter: 'https://twitter.com/jamesliu_dev',
+        instagram: 'https://instagram.com/jamesliu.dev'
+      }
+    },
+    {
+      rank: 7,
+      name: 'Amara Okafor',
+      username: 'amaraok',
+      bio: 'Climate tech entrepreneur building solutions in Nigeria',
+      totalTips: 195,
+      tipCount: 9,
+      avatar: '🌱',
+      social: {
+        youtube: 'https://youtube.com/amaraok',
+        twitter: 'https://twitter.com/amaraokafor',
+        instagram: 'https://instagram.com/amara_climatetech'
+      }
+    },
+    {
+      rank: 8,
+      name: 'Viktor Petrov',
+      username: 'viktorpetrov',
+      bio: 'Podcast host discussing emerging markets and crypto',
+      totalTips: 240,
+      tipCount: 6,
+      avatar: '🎙️',
+      social: {
+        youtube: 'https://youtube.com/viktorpetrov',
+        twitter: 'https://twitter.com/viktorpetrov',
+        instagram: 'https://instagram.com/viktor.petrov.podcast'
+      }
+    }
+  ],
   tips: [
     {
       sender: 'Alice K.',
@@ -92,6 +207,19 @@ app.get('/api/tips', (req, res) => {
   res.json(db.tips);
 });
 
+// 3b. Get all creators for spotlight
+app.get('/api/creators', (req, res) => {
+  const db = readDB();
+  // Sort creators by totalTips in descending order and assign ranks
+  const sortedCreators = (db.creators || [])
+    .sort((a, b) => b.totalTips - a.totalTips)
+    .map((creator, index) => ({
+      ...creator,
+      rank: index + 1
+    }));
+  res.json(sortedCreators);
+});
+
 // 4. Add a new tip
 app.post('/api/tips', (req, res) => {
   const db = readDB();
@@ -112,6 +240,29 @@ app.post('/api/tips', (req, res) => {
   db.tips = [newTip, ...db.tips];
   writeDB(db);
   res.json({ success: true, tip: newTip });
+});
+
+// Claim Daily UBI Endpoint
+app.post('/api/claim-ubi', (req, res) => {
+  const creatorUsername = req.body.creatorUsername || 'unknown';
+  const claimAmount = 1.00; // Daily UBI amount in G$
+  
+  // In a real implementation, this would:
+  // 1. Verify user is KYC verified
+  // 2. Check last claim time (24h cooldown)
+  // 3. Call GoodDollar API to mint G$ tokens
+  // 4. Update blockchain ledger
+  
+  // For now, return success with mock data
+  res.json({
+    success: true,
+    amount: claimAmount,
+    currency: 'G$',
+    username: creatorUsername,
+    claimTime: new Date().toISOString(),
+    nextClaimTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    message: `Successfully claimed ${claimAmount} G$ from your daily UBI allocation!`
+  });
 });
 
 app.listen(PORT, () => {

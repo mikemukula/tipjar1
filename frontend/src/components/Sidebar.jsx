@@ -1,10 +1,12 @@
 import React from 'react';
-import { LayoutDashboard, ExternalLink, Info, DollarSign, User, Zap } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, Info, DollarSign, User, Zap, TrendingUp } from 'lucide-react';
 
 export default function Sidebar({ currentView, setView, creatorInfo }) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'preview', label: 'View Tip Page', icon: DollarSign },
+    { id: 'spotlight', label: 'App Spotlight', icon: TrendingUp },
+    { id: 'kyc-ubi', label: 'KYC & UBI', icon: Zap },
     { id: 'how-it-works', label: 'How it Works', icon: Info },
   ];
 
