@@ -29,15 +29,18 @@ interface Creator {
   bio: string;
   youtube: string;
   twitter: string;
-  walletAddress?: string;
+  wallet_address?: string;
 }
 
 interface Tip {
-  sender: string;
-  address: string;
+  id?: string;
+  creator_username: string;
+  sender_name: string;
+  sender_address: string;
   amount: number;
   message: string;
-  date: string;
+  tx_hash?: string | null;
+  created_at?: string;
 }
 
 interface TipPageViewProps {
@@ -83,11 +86,11 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
       setIsSuccess(true);
       if (onAddTip) {
         onAddTip({
-          sender: senderName.trim() || 'Anonymous Fan',
-          address: '0x' + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+          creator_username: creatorInfo.username,
+          sender_name: senderName.trim() || 'Anonymous Fan',
+          sender_address: '',
           amount: activeAmount,
           message: message.trim() || 'Supported the creator!',
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         });
       }
     }, 2000);
@@ -132,11 +135,11 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
                 )}
               </div>
             )}
-            {creatorInfo.walletAddress && (
+            {creatorInfo.wallet_address && (
               <div className="wallet-address-badge">
                 <span className="wallet-label">Celo Address</span>
                 <span className="wallet-addr">
-                  {creatorInfo.walletAddress.slice(0, 6)}…{creatorInfo.walletAddress.slice(-4)}
+                  {creatorInfo.wallet_address.slice(0, 6)}…{creatorInfo.wallet_address.slice(-4)}
                 </span>
               </div>
             )}

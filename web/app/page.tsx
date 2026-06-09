@@ -12,39 +12,55 @@ interface Creator {
   bio: string;
   youtube: string;
   twitter: string;
-  walletAddress?: string;
+  wallet_address?: string;
 }
 
 interface Tip {
-  sender: string;
-  address: string;
+  id?: string;
+  creator_username: string;
+  sender_name: string;
+  sender_address: string;
   amount: number;
   message: string;
-  date: string;
+  tx_hash?: string | null;
+  created_at?: string;
 }
 
 export default function Home() {
   const { ready, authenticated, login, user } = usePrivy();
 
   const [creatorInfo, setCreatorInfo] = useState<Creator>({
-    name: '', username: '', bio: '', youtube: '', twitter: '', walletAddress: '',
+    name: '', username: '', bio: '', youtube: '', twitter: '', wallet_address: '',
   });
-  const [mockTips, setMockTips] = useState<Tip[]>([]);
+  const [tips, setTips] = useState<Tip[]>([]);
   const [currentView, setCurrentView] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch profile + tips on mount
+  // Fetch profile by wallet address once authenticated
   useEffect(() => {
+    if (!ready) return;
+    if (!authenticated || !user) {
+      setIsLoading(false);
+      return;
+    }
+    const wallet = user.linkedAccounts?.find((a) => a.type === 'wallet');
+    const address = (wallet as { address?: string })?.address || '';
+    if (!address) {
+      setIsLoading(false);
+      return;
+    }
     const fetchData = async () => {
       try {
-        const [profileRes, tipsRes] = await Promise.all([
-          fetch('/api/profile'),
-          fetch('/api/tips'),
-        ]);
-        const profile = await profileRes.json();
-        const tips = await tipsRes.json();
-        setCreatorInfo(profile);
-        setMockTips(tips);
+        const profileRes = await fetch(`/api/profile?wallet=${address}`);
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          setCreatorInfo(profile);
+          const tipsRes = await fetch(`/api/tips?username=${profile.username}`);
+          if (tipsRes.ok) setTips(await tipsRes.json());
+        } else {
+          // New user — pre-fill wallet address
+          setCreatorInfo((prev) => ({ ...prev, wallet_address: address }));
+        }
       } catch (err) {
         console.error('Failed to fetch data', err);
       } finally {
@@ -52,26 +68,23 @@ export default function Home() {
       }
     };
     fetchData();
-  }, []);
-
-  // Sync Privy wallet address into profile when logged in
-  useEffect(() => {
-    if (!user) return;
-    const wallet = user.linkedAccounts?.find((a) => a.type === 'wallet');
-    const address = (wallet as { address?: string })?.address || '';
-    if (address && address !== creatorInfo.walletAddress) {
-      setCreatorInfo((prev) => ({ ...prev, walletAddress: address }));
-    }
-  }, [user]);
+  }, [ready, authenticated, user]);
 
   const handleSaveProfile = async (updatedProfile: Creator) => {
+    const wallet = user?.linkedAccounts?.find((a) => a.type === 'wallet');
+    const address = (wallet as { address?: string })?.address || updatedProfile.wallet_address || '';
     const res = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProfile),
+      body: JSON.stringify({ ...updatedProfile, wallet_address: address }),
     });
     const data = await res.json();
-    if (data.success) setCreatorInfo(data.profile);
+    if (data.success) {
+      setCreatorInfo(data.profile);
+      // Reload tips for new username
+      const tipsRes = await fetch(`/api/tips?username=${data.profile.username}`);
+      if (tipsRes.ok) setTips(await tipsRes.json());
+    }
   };
 
   const handleAddTip = async (newTip: Tip) => {
@@ -82,9 +95,9 @@ export default function Home() {
         body: JSON.stringify(newTip),
       });
       const data = await res.json();
-      if (data.success) setMockTips((prev) => [data.tip, ...prev]);
+      if (data.success) setTips((prev) => [data.tip, ...prev]);
     } catch {
-      setMockTips((prev) => [newTip, ...prev]);
+      setTips((prev) => [newTip, ...prev]);
     }
   };
 
@@ -144,7 +157,7 @@ export default function Home() {
           <DashboardView
             creatorInfo={creatorInfo}
             setCreatorInfo={setCreatorInfo}
-            mockTips={mockTips}
+            tips={tips}
             onSaveProfile={handleSaveProfile}
           />
         )}

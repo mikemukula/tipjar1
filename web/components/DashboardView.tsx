@@ -22,25 +22,28 @@ interface Creator {
   bio: string;
   youtube: string;
   twitter: string;
-  walletAddress?: string;
+  wallet_address?: string;
 }
 
 interface Tip {
-  sender: string;
-  address: string;
+  id?: string;
+  creator_username: string;
+  sender_name: string;
+  sender_address: string;
   amount: number;
   message: string;
-  date: string;
+  tx_hash?: string | null;
+  created_at?: string;
 }
 
 interface DashboardViewProps {
   creatorInfo: Creator;
   setCreatorInfo: (info: Creator) => void;
-  mockTips: Tip[];
+  tips: Tip[];
   onSaveProfile: (profile: Creator) => Promise<void>;
 }
 
-export default function DashboardView({ creatorInfo, setCreatorInfo, mockTips, onSaveProfile }: DashboardViewProps) {
+export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSaveProfile }: DashboardViewProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWidget, setCopiedWidget] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -90,13 +93,13 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, mockTips, o
     document.body.removeChild(link);
   };
 
-  const totalTips = mockTips.reduce((sum, tip) => sum + tip.amount, 0);
-  const avgTip = mockTips.length > 0 ? Math.round(totalTips / mockTips.length) : 0;
+  const totalTips = tips.reduce((sum, tip) => sum + Number(tip.amount), 0);
+  const avgTip = tips.length > 0 ? Math.round(totalTips / tips.length) : 0;
   const bioLength = (creatorInfo.bio || '').length;
 
   const statCards = [
     { label: 'Total Tips Received', value: totalTips.toLocaleString(), suffix: 'G$', desc: 'All-time earnings', accent: '#111111', progress: 0.78 },
-    { label: 'Tips Volume', value: mockTips.length, suffix: null, desc: 'Individual payments', accent: '#999999', progress: 0.54 },
+    { label: 'Tips Volume', value: tips.length, suffix: null, desc: 'Individual payments', accent: '#999999', progress: 0.54 },
     { label: 'Average Tip', value: avgTip, suffix: 'G$', desc: 'Per fan interaction', accent: '#cccccc', progress: 0.35 },
   ];
 
@@ -178,12 +181,12 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, mockTips, o
               </div>
             </div>
           </div>
-          {creatorInfo.walletAddress && (
+          {creatorInfo.wallet_address && (
             <>
               <div className="form-divider" />
               <div className="form-group">
                 <label>Celo Wallet Address</label>
-                <input type="text" readOnly value={creatorInfo.walletAddress} className="wallet-input" />
+                <input type="text" readOnly value={creatorInfo.wallet_address} className="wallet-input" />
               </div>
             </>
           )}
@@ -232,7 +235,7 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, mockTips, o
       {/* Tip Ledger */}
       <div className="glass-card section-card span-2 ledger-card" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '1s' }}>
         <div className="section-header"><MessageSquare size={20} /><h3>Recent Tips & Messages</h3></div>
-        {mockTips.length === 0 ? (
+        {tips.length === 0 ? (
           <div className="empty-ledger">
             <div className="empty-ledger-icons">
               <Coffee size={28} style={{ opacity: 0.18 }} />
@@ -247,20 +250,20 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, mockTips, o
             <table className="ledger-table">
               <thead><tr><th>Sender</th><th>Message</th><th>Amount</th><th>Date</th></tr></thead>
               <tbody>
-                {mockTips.map((tip, index) => (
-                  <tr key={index} className="ledger-row">
+                {tips.map((tip) => (
+                  <tr key={tip.id || tip.created_at} className="ledger-row">
                     <td>
                       <div className="sender-cell">
-                        <div className="sender-avatar">{tip.sender.charAt(0).toUpperCase()}</div>
+                        <div className="sender-avatar">{(tip.sender_name || 'A').charAt(0).toUpperCase()}</div>
                         <div className="sender-info">
-                          <span className="sender-name">{tip.sender}</span>
-                          <span className="sender-address">{tip.address}</span>
+                          <span className="sender-name">{tip.sender_name}</span>
+                          <span className="sender-address">{tip.sender_address}</span>
                         </div>
                       </div>
                     </td>
                     <td className="message-cell">&quot;{tip.message}&quot;</td>
                     <td className="amount-cell"><span className="tip-amount-badge">+{tip.amount} G$</span></td>
-                    <td className="date-cell">{tip.date}</td>
+                    <td className="date-cell">{tip.created_at ? new Date(tip.created_at).toLocaleString() : ''}</td>
                   </tr>
                 ))}
               </tbody>

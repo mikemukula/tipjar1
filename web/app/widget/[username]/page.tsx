@@ -9,22 +9,27 @@ interface Creator {
   bio: string;
   youtube: string;
   twitter: string;
-  walletAddress?: string;
+  wallet_address?: string;
 }
 
 interface Tip {
-  sender: string;
-  address: string;
+  id?: string;
+  creator_username: string;
+  sender_name: string;
+  sender_address: string;
   amount: number;
   message: string;
-  date: string;
+  tx_hash?: string | null;
+  created_at?: string;
 }
 
 export default function WidgetPage({ params }: { params: { username: string } }) {
   const [creatorInfo, setCreatorInfo] = useState<Creator | null>(null);
 
   useEffect(() => {
-    fetch('/api/profile').then((r) => r.json()).then(setCreatorInfo);
+    fetch(`/api/profile?username=${params.username}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setCreatorInfo(data); });
   }, [params.username]);
 
   const handleAddTip = async (tip: Tip) => {

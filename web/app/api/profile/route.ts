@@ -1,15 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDB, writeDB } from '@/lib/db';
+import { getCreator, getCreatorByWallet, upsertCreator } from '@/lib/db';
 
-export async function GET() {
-  const db = readDB();
-  return NextResponse.json(db.creator);
+// GET /api/profile?username=foo  OR  /api/profile?wallet=0x...
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const username = searchParams.get('username');
+  const wallet = searchParams.get('wallet');
+
+  if (!username && !wallet) {
+    return NextResponse.json({ error: 'Provide username or wallet param' }, { status: 400 });
+  }
+
+  const creator = username
+    ? await getCreator(username)
+    : await getCreatorByWallet(wallet!);
+
+  if (!creator) {
+    return NextResponse.json({ error: 'Creator not found' }, { status: 404 });
+  }
+
+  return NextResponse.json(creator);
 }
 
+// POST /api/profile  — create or update creator profile
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const db = readDB();
-  db.creator = { ...db.creator, ...body };
-  writeDB(db);
-  return NextResponse.json({ success: true, profile: db.creator });
+  const { username, wallet_address, name, bio, youtube, twitter, avatar_url } = body;
+
+  if (!username || !wallet_address) {
+    return NextResponse.json({ error: 'username and wallet_address are required' }, { status: 400 });
+  }
+
+  const creator = await upsertCreator({
+    username,
+    wallet_address,
+    name: name || '',
+    bio: bio || '',
+    youtube: youtube || '',
+    twitter: twitter || '',
+    avatar_url: avatar_url || '',
+    is_active: true,
+  });
+
+  if (!creator) {
+    return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, profile: creator });
 }

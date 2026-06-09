@@ -9,22 +9,31 @@ interface Creator {
   bio: string;
   youtube: string;
   twitter: string;
-  walletAddress?: string;
+  wallet_address?: string;
 }
 
 interface Tip {
-  sender: string;
-  address: string;
+  id?: string;
+  creator_username: string;
+  sender_name: string;
+  sender_address: string;
   amount: number;
   message: string;
-  date: string;
+  tx_hash?: string | null;
+  created_at?: string;
 }
 
 export default function TipPageClient({ username }: { username: string }) {
   const [creatorInfo, setCreatorInfo] = useState<Creator | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch('/api/profile').then((r) => r.json()).then(setCreatorInfo);
+    fetch(`/api/profile?username=${username}`)
+      .then((r) => {
+        if (!r.ok) { setNotFound(true); return null; }
+        return r.json();
+      })
+      .then((data) => { if (data) setCreatorInfo(data); });
   }, [username]);
 
   const handleAddTip = async (tip: Tip) => {
@@ -34,6 +43,15 @@ export default function TipPageClient({ username }: { username: string }) {
       body: JSON.stringify(tip),
     });
   };
+
+  if (notFound) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '1.1rem' }}>Creator not found</p>
+        <p style={{ fontSize: '0.85rem', opacity: 0.5 }}>@{username} has not registered yet.</p>
+      </div>
+    );
+  }
 
   if (!creatorInfo) {
     return (
