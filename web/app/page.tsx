@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Sidebar from '@/components/Sidebar';
+import Navbar from '@/components/Navbar';
 import dynamic from 'next/dynamic';
 
 const ConnectedDashboard = dynamic(() => import('@/components/ConnectedDashboard'), { ssr: false });
@@ -174,6 +175,11 @@ export default function Home() {
   return (
     <div className="app-container">
       <Sidebar currentView={currentView} setView={setCurrentView} creatorInfo={creatorInfo} />
+      <Navbar
+        currentView={currentView}
+        username={creatorInfo.username}
+        walletAddress={walletAddress || undefined}
+      />
       <main className="main-content">
         {(currentView === 'dashboard' || currentView === 'preview') && (
           <ConnectedDashboard

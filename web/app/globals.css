@@ -5,6 +5,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
+  --navbar-height: 60px;
   --bg-primary: #fafaf7;
   --bg-secondary: #f4f4f0;
   --bg-tertiary: #eeeee9;
@@ -393,6 +394,7 @@ label {
 .main-content {
   flex: 1;
   padding: 40px;
+  padding-top: calc(var(--navbar-height) + 36px);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   animation: fadeIn 0.5s var(--ease-out-expo) both;
@@ -404,7 +406,7 @@ label {
 
 @media (max-width: 768px) {
   :root { --sidebar-width: 0px; }
-  .main-content { margin-left: 0; padding: 24px; padding-top: 80px; }
+  .main-content { margin-left: 0; padding: 16px; padding-top: 120px; }
   .glass-card { padding: 18px; border-radius: 10px; }
 }
 

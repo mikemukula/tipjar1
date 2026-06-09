@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, DollarSign, Info, Zap, LogOut } from 'lucide-react';
+import { LayoutDashboard, Eye, Info, Zap, LogOut, ArrowUpRight } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 
 interface Creator {
@@ -18,9 +18,9 @@ export default function Sidebar({ currentView, setView, creatorInfo }: SidebarPr
   const { logout } = usePrivy();
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'preview', label: 'View Tip Page', icon: DollarSign },
-    { id: 'how-it-works', label: 'How it Works', icon: Info },
+    { id: 'dashboard',      label: 'Dashboard',    icon: LayoutDashboard },
+    { id: 'preview',        label: 'Tip Page',      icon: Eye },
+    { id: 'how-it-works',   label: 'How it Works',  icon: Info },
   ];
 
   return (
@@ -68,6 +68,19 @@ export default function Sidebar({ currentView, setView, creatorInfo }: SidebarPr
           </button>
         </div>
       </div>
+
+      {creatorInfo.username && (
+        <a
+          href={`/tip/${creatorInfo.username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="view-tip-page-btn"
+        >
+          <Eye size={13} />
+          <span>View tip page</span>
+          <ArrowUpRight size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+        </a>
+      )}
 
       <div className="powered-tag">
         <Zap size={10} style={{ opacity: 0.45 }} />
@@ -213,6 +226,26 @@ export default function Sidebar({ currentView, setView, creatorInfo }: SidebarPr
           transition: opacity 0.3s ease;
         }
         .powered-tag:hover { opacity: 0.65; }
+
+        .view-tip-page-btn {
+          display: flex; align-items: center; gap: 8px;
+          margin-bottom: 12px; padding: 9px 12px;
+          background: rgba(255,255,255,0.4);
+          border: 1px solid var(--border-glass);
+          border-radius: 8px;
+          font-size: 0.8rem; font-weight: 500;
+          color: var(--text-secondary);
+          text-decoration: none;
+          transition: var(--transition-fast);
+          cursor: pointer;
+        }
+        .view-tip-page-btn:hover {
+          background: rgba(255,255,255,0.7);
+          color: var(--text-primary);
+          border-color: var(--border-glass-hover);
+          transform: none;
+          border-bottom-color: var(--border-glass-hover);
+        }
 
         @media (max-width: 768px) {
           .sidebar {

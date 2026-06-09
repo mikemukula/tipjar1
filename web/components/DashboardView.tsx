@@ -109,21 +109,33 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
   return (
     <div className="dashboard-grid">
       {/* Header */}
-      <div className="dashboard-header span-2">
-        <div>
-          <span className="tag-mono" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '0.1s' }}>Creator Control</span>
-          <h1 className="dashboard-title" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '0.2s' }}>Overview</h1>
-          <p className="dashboard-subtitle" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '0.35s' }}>
-            Manage your creator profile, track earnings, and share your tipping assets.
-          </p>
-        </div>
-        <div className="tip-link-container glass-card" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '0.3s' }}>
-          <span className="tip-link-label">Your Tipping Link:</span>
-          <div className="tip-link-input-group">
-            <input type="text" readOnly value={tipLink} className="tip-link-input" />
-            <button onClick={() => copyToClipboard(tipLink)} className="btn-copy-link">
-              {copiedLink ? <><Check size={14} /><span>DONE</span></> : <><Copy size={14} /><span>COPY</span></>}
-            </button>
+      <div className="dashboard-header span-2" style={{ animation: mounted ? 'fadeUp 0.5s ease both' : 'none', animationDelay: '0.1s' }}>
+        <div className="dashboard-hero">
+          <div className="dashboard-hero-text">
+            <div className="hero-greeting">
+              {creatorInfo.name ? `Hello, ${creatorInfo.name.split(' ')[0]} 👋` : 'Welcome to your studio'}
+            </div>
+            <h1 className="dashboard-title">Creator Dashboard</h1>
+            <p className="dashboard-subtitle">
+              Track your G$ earnings, manage your profile, and share your tipping link.
+            </p>
+          </div>
+          <div className="dashboard-hero-actions">
+            <div className="tip-link-container glass-card">
+              <div className="tip-link-header">
+                <span className="tip-link-label">Your tipping link</span>
+                {creatorInfo.username
+                  ? <span className="tip-link-status active-dot">Active</span>
+                  : <span className="tip-link-status inactive-dot">Set a username first</span>
+                }
+              </div>
+              <div className="tip-link-input-group">
+                <span className="tip-link-display">{tipLink}</span>
+                <button onClick={() => copyToClipboard(tipLink)} className="btn-copy-link" disabled={!creatorInfo.username}>
+                  {copiedLink ? <><Check size={14} /><span>Copied!</span></> : <><Copy size={14} /><span>Copy</span></>}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -291,15 +303,25 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
 
         .dashboard-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
         .span-2 { grid-column: span 2; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .dashboard-title { font-family: var(--font-mono); font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 4px; }
-        .dashboard-subtitle { font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px; max-width: 380px; line-height: 1.5; }
-        .tip-link-container { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; min-width: 380px; }
-        .tip-link-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
-        .tip-link-input-group { display: flex; gap: 8px; }
-        .tip-link-input { font-family: var(--font-mono); font-size: 0.85rem; flex: 1; }
-        .btn-copy-link { background: var(--text-primary); color: #fff; border: none; border-radius: 8px; padding: 0 16px; height: 42px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: var(--transition-smooth); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; }
-        .btn-copy-link:hover { transform: scale(1.03); background: #222; }
+        .dashboard-header { margin-bottom: 8px; }
+        .dashboard-hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; padding: 28px 32px; background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%); border: 1px solid var(--border-glass); border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dashboard-hero-text { flex: 1; min-width: 0; }
+        .hero-greeting { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 6px; }
+        .dashboard-title { font-family: var(--font-sans); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; color: var(--text-primary); }
+        .dashboard-subtitle { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.55; max-width: 360px; margin: 0; }
+        .dashboard-hero-actions { flex-shrink: 0; min-width: 340px; }
+        .tip-link-container { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+        .tip-link-header { display: flex; align-items: center; justify-content: space-between; }
+        .tip-link-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; font-family: var(--font-mono); }
+        .tip-link-status { font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 8px; border-radius: 999px; display: flex; align-items: center; gap: 4px; }
+        .active-dot { background: rgba(52,199,89,0.1); color: #1a7a38; border: 1px solid rgba(52,199,89,0.2); }
+        .active-dot::before { content: ''; display: inline-block; width: 5px; height: 5px; background: #34c759; border-radius: 50%; }
+        .inactive-dot { background: rgba(0,0,0,0.03); color: var(--text-muted); border: 1px solid var(--border-glass); }
+        .tip-link-input-group { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.7); border: 1px solid var(--border-glass); border-radius: 8px; padding: 4px 4px 4px 12px; }
+        .tip-link-display { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .btn-copy-link { background: var(--text-primary); color: #fff; border: none; border-radius: 6px; padding: 0 14px; height: 36px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: var(--transition-smooth); font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; flex-shrink: 0; }
+        .btn-copy-link:hover:not(:disabled) { background: #222; }
+        .btn-copy-link:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .analytics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
         .stat-card { display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden; }
@@ -373,8 +395,8 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
         .date-cell { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
 
         @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } .span-2 { grid-column: span 1; } .analytics-row { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 768px) { .dashboard-header { flex-direction: column; align-items: flex-start; gap: 16px; } .tip-link-container { width: 100%; min-width: 0; } .analytics-row { grid-template-columns: 1fr; } .qr-display-container { flex-direction: column; align-items: center; text-align: center; } }
-        @media (max-width: 480px) { .dashboard-title { font-size: 1.75rem; } .stat-value { font-size: 1.6rem; } .ledger-table th, .ledger-table td { padding: 10px 8px; } .sender-avatar { display: none; } }
+        @media (max-width: 768px) { .dashboard-hero { flex-direction: column; align-items: flex-start; gap: 16px; padding: 20px; } .dashboard-hero-actions { width: 100%; min-width: 0; } .analytics-row { grid-template-columns: 1fr; } .qr-display-container { flex-direction: column; align-items: center; text-align: center; } }
+        @media (max-width: 480px) { .dashboard-title { font-size: 1.6rem; } .stat-value { font-size: 1.6rem; } .ledger-table th, .ledger-table td { padding: 10px 8px; } .sender-avatar { display: none; } }
       `}</style>
     </div>
   );
