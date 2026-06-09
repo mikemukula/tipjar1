@@ -2,26 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TipPageView from '@/components/TipPageView';
-
-interface Creator {
-  name: string;
-  username: string;
-  bio: string;
-  youtube: string;
-  twitter: string;
-  wallet_address?: string;
-}
-
-interface Tip {
-  id?: string;
-  creator_username: string;
-  sender_name: string;
-  sender_address: string;
-  amount: number;
-  message: string;
-  tx_hash?: string | null;
-  created_at?: string;
-}
+import type { Creator, Tip } from '@/providers/CreatorProvider';
 
 export default function TipPageClient({ username }: { username: string }) {
   const [creatorInfo, setCreatorInfo] = useState<Creator | null>(null);

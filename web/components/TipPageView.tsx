@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Send, CheckCircle2, User, MessageCircle, ArrowRight, Star, ExternalLink } from 'lucide-react';
 import { useSendTip } from '@/hooks/useSendTip';
+import type { Creator, Tip } from '@/providers/CreatorProvider';
 
 const YoutubeIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -23,26 +24,6 @@ const AnimatedCheck = () => (
     <path className="check-path" d="M17 28.5L24.5 36L39 21" stroke="var(--text-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
-interface Creator {
-  name: string;
-  username: string;
-  bio: string;
-  youtube: string;
-  twitter: string;
-  wallet_address?: string;
-}
-
-interface Tip {
-  id?: string;
-  creator_username: string;
-  sender_name: string;
-  sender_address: string;
-  amount: number;
-  message: string;
-  tx_hash?: string | null;
-  created_at?: string;
-}
 
 interface TipPageViewProps {
   creatorInfo: Creator;

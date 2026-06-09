@@ -1,26 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, Share2, Wifi, ChevronRight } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Check, Share2, ChevronRight } from 'lucide-react';
 
 interface NavbarProps {
-  currentView: string;
   username: string;
   walletAddress?: string;
 }
 
 const PAGE_LABELS: Record<string, { label: string; sub: string }> = {
-  dashboard:    { label: 'Dashboard',    sub: 'Creator overview & settings' },
-  preview:      { label: 'Tip Page',     sub: 'Live preview & sharing' },
-  'how-it-works': { label: 'How it Works', sub: 'Platform guide' },
+  '/dashboard':    { label: 'Dashboard',    sub: 'Creator overview & settings' },
+  '/preview':      { label: 'Tip Page',     sub: 'Live preview & sharing' },
+  '/how-it-works': { label: 'How it Works', sub: 'Platform guide' },
 };
 
 function shortAddr(addr: string) {
   return addr.slice(0, 6) + '…' + addr.slice(-4);
 }
 
-export default function Navbar({ currentView, username, walletAddress }: NavbarProps) {
+export default function Navbar({ username, walletAddress }: NavbarProps) {
   const [copied, setCopied] = useState(false);
+  const pathname = usePathname();
 
   const tipUrl = typeof window !== 'undefined' && username
     ? `${window.location.origin}/tip/${username}`
@@ -33,7 +34,7 @@ export default function Navbar({ currentView, username, walletAddress }: NavbarP
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const page = PAGE_LABELS[currentView] ?? PAGE_LABELS['dashboard'];
+  const page = PAGE_LABELS[pathname] ?? PAGE_LABELS['/dashboard'];
 
   return (
     <header className="topnav">

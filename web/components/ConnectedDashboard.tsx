@@ -3,37 +3,18 @@
 import { useRegisterCreator, useIsRegistered } from '@/hooks/useRegisterCreator';
 import DashboardView from './DashboardView';
 import TipPageView from './TipPageView';
-
-interface Creator {
-  name: string;
-  username: string;
-  bio: string;
-  youtube: string;
-  twitter: string;
-  wallet_address?: string;
-}
-
-interface Tip {
-  id?: string;
-  creator_username: string;
-  sender_name: string;
-  sender_address: string;
-  amount: number;
-  message: string;
-  tx_hash?: string | null;
-  created_at?: string;
-}
+import type { Creator, Tip } from '@/providers/CreatorProvider';
 
 interface Props {
   creatorInfo: Creator;
   setCreatorInfo: (info: Creator) => void;
   tips: Tip[];
-  currentView: string;
+  currentView: 'dashboard' | 'preview';
   walletAddress: `0x${string}` | '';
   onAddTip: (tip: Tip) => Promise<void>;
   onSaveProfile: (
     profile: Creator,
-    opts: {
+    opts?: {
       isOnChain: boolean;
       registerCreator: (u: string) => Promise<boolean>;
       updateUsername: (u: string) => Promise<boolean>;
@@ -61,38 +42,34 @@ export default function ConnectedDashboard({
       updateUsername,
     });
 
-  if (currentView === 'dashboard') {
-    return (
-      <DashboardView
-        creatorInfo={creatorInfo}
-        setCreatorInfo={setCreatorInfo}
-        tips={tips}
-        onSaveProfile={handleSave}
-        isOnChain={!!isOnChain}
-        regStatus={regStatus}
-        regError={regError}
-      />
-    );
-  }
-
   if (currentView === 'preview') {
     return (
       <div className="preview-container">
         <div className="preview-banner">
           <span className="tag-mono">Preview Mode</span>
-          <h2>Tipping Page Live Preview</h2>
-          <p>This is what your fans see. Try the tipping flow to see updates in your dashboard ledger!</p>
+          <h2>Your Public Tip Page</h2>
+          <p>This is exactly what fans see when they visit your tipping link.</p>
         </div>
         <TipPageView creatorInfo={creatorInfo} onAddTip={onAddTip} />
         <style>{`
-          .preview-container { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-          .preview-banner { text-align: center; max-width: 600px; margin-bottom: 8px; }
-          .preview-banner h2 { font-family: var(--font-mono); font-size: 1.75rem; margin-top: 4px; }
-          .preview-banner p { font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px; }
+          .preview-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+          .preview-banner { text-align: center; max-width: 560px; }
+          .preview-banner h2 { font-family: var(--font-mono); font-size: 1.6rem; margin-top: 6px; }
+          .preview-banner p { font-size: 0.875rem; color: var(--text-secondary); margin-top: 6px; }
         `}</style>
       </div>
     );
   }
 
-  return null;
+  return (
+    <DashboardView
+      creatorInfo={creatorInfo}
+      setCreatorInfo={setCreatorInfo}
+      tips={tips}
+      onSaveProfile={handleSave}
+      isOnChain={!!isOnChain}
+      regStatus={regStatus}
+      regError={regError}
+    />
+  );
 }

@@ -1,26 +1,29 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Eye, Info, Zap, LogOut, ArrowUpRight } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 
 interface Creator {
   name: string;
   username: string;
+  wallet_address?: string;
 }
 
 interface SidebarProps {
-  currentView: string;
-  setView: (view: string) => void;
   creatorInfo: Creator;
+  walletAddress?: string;
 }
 
-export default function Sidebar({ currentView, setView, creatorInfo }: SidebarProps) {
+export default function Sidebar({ creatorInfo, walletAddress }: SidebarProps) {
   const { logout } = usePrivy();
+  const pathname = usePathname();
 
   const menuItems = [
-    { id: 'dashboard',      label: 'Dashboard',    icon: LayoutDashboard },
-    { id: 'preview',        label: 'Tip Page',      icon: Eye },
-    { id: 'how-it-works',   label: 'How it Works',  icon: Info },
+    { href: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard },
+    { href: '/preview',      label: 'Tip Page',    icon: Eye },
+    { href: '/how-it-works', label: 'How it Works', icon: Info },
   ];
 
   return (
@@ -36,17 +39,17 @@ export default function Sidebar({ currentView, setView, creatorInfo }: SidebarPr
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentView === item.id;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
+            <Link
+              key={item.href}
+              href={item.href}
               className={`nav-item ${isActive ? 'active' : ''}`}
             >
               <span className="nav-indicator" />
               <Icon size={18} className="nav-icon" />
               <span className="nav-label">{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>
