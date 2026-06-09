@@ -17,3 +17,4 @@ web/build/
 # Misc
 .DS_Store
 *.log
+contracts/.env
