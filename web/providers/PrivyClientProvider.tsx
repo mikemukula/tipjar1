@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { PrivyProvider } from '@privy-io/react-auth';
+import { WagmiProvider, createConfig } from '@privy-io/wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { http } from 'viem';
+import { defineChain } from 'viem';
 
-const celo = {
+const celo = defineChain({
   id: 42220,
   name: 'Celo',
   nativeCurrency: { decimals: 18, name: 'CELO', symbol: 'CELO' },
   rpcUrls: { default: { http: ['https://forno.celo.org'] } },
   blockExplorers: { default: { name: 'Celoscan', url: 'https://celoscan.io' } },
-} as const;
+});
+
+const wagmiConfig = createConfig({
+  chains: [celo],
+  transports: { [celo.id]: http() },
+});
+
+const queryClient = new QueryClient();
 
 export default function PrivyClientProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -17,7 +28,6 @@ export default function PrivyClientProvider({ children }: { children: React.Reac
 
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
-  // Render children without Privy if no valid app ID is set yet
   if (!mounted || !appId || appId === 'your-privy-app-id-here') {
     return <>{children}</>;
   }
@@ -35,7 +45,11 @@ export default function PrivyClientProvider({ children }: { children: React.Reac
         },
       }}
     >
-      {children}
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
+          {children}
+        </WagmiProvider>
+      </QueryClientProvider>
     </PrivyProvider>
   );
 }

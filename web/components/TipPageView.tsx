@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, CheckCircle2, User, MessageCircle, ArrowRight, Star } from 'lucide-react';
+import { Send, CheckCircle2, User, MessageCircle, ArrowRight, Star, ExternalLink } from 'lucide-react';
+import { useSendTip } from '@/hooks/useSendTip';
 
 const YoutubeIcon = ({ size = 16, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -54,9 +55,17 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
   const [customAmount, setCustomAmount] = useState('');
   const [message, setMessage] = useState('');
   const [senderName, setSenderName] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [bounceKey, setBounceKey] = useState<number | null>(null);
+
+  const { sendTip, status, txHash, error: tipError, reset: resetTip } = useSendTip();
+
+  const isSending = status === 'approving' || status === 'approved' || status === 'sending';
+  const isSuccess = status === 'success';
+
+  const sendingLabel =
+    status === 'approving' ? 'Approving G$…' :
+    status === 'approved'  ? 'Approval confirmed…' :
+    status === 'sending'   ? 'Sending tip…' : 'Processing…';
 
   const presets = [10, 50, 100, 500];
 
@@ -77,27 +86,30 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
 
   const activeAmount = selectedAmount !== null ? selectedAmount : (parseInt(customAmount) || 0);
 
-  const handleSubmitTip = (e: React.FormEvent) => {
+  const handleSubmitTip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (activeAmount <= 0) return;
-    setIsSending(true);
-    setTimeout(() => {
-      setIsSending(false);
-      setIsSuccess(true);
-      if (onAddTip) {
-        onAddTip({
-          creator_username: creatorInfo.username,
-          sender_name: senderName.trim() || 'Anonymous Fan',
-          sender_address: '',
-          amount: activeAmount,
-          message: message.trim() || 'Supported the creator!',
-        });
-      }
-    }, 2000);
+
+    const hash = await sendTip({
+      creatorUsername: creatorInfo.username,
+      amountG$: activeAmount,
+      message: message.trim() || '',
+    });
+
+    if (hash && onAddTip) {
+      onAddTip({
+        creator_username: creatorInfo.username,
+        sender_name: senderName.trim() || 'Anonymous Fan',
+        sender_address: '',
+        amount: activeAmount,
+        message: message.trim() || 'Supported the creator!',
+        tx_hash: hash,
+      });
+    }
   };
 
   const resetForm = () => {
-    setIsSuccess(false);
+    resetTip();
     setMessage('');
     setSenderName('');
     setSelectedAmount(50);
@@ -206,11 +218,14 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
               </div>
             </div>
 
+            {tipError && (
+              <div className="tip-error-banner">{tipError}</div>
+            )}
             <button type="submit" disabled={activeAmount <= 0 || isSending} className="tip-submit-btn">
               {isSending ? (
                 <div className="submit-loading">
                   <div className="spinner-clean" />
-                  <span className="sending-text">Processing…</span>
+                  <span className="sending-text">{sendingLabel}</span>
                 </div>
               ) : (
                 <span className="submit-content">
@@ -253,6 +268,16 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
               </div>
             )}
           </div>
+          {txHash && (
+            <a
+              href={`https://celoscan.io/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tx-link"
+            >
+              <ExternalLink size={13} /> View on Celoscan
+            </a>
+          )}
           <button onClick={resetForm} className="btn-secondary full-width reset-btn">
             Send Another Tip
           </button>
@@ -343,6 +368,9 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
         .receipt-msg { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.04); }
         .receipt-msg-text { margin-top: 6px; font-size: 0.84rem; color: var(--text-secondary); font-style: italic; }
         .reset-btn { width: 100%; padding: 14px; border-radius: 10px; font-weight: 600; }
+        .tip-error-banner { background: rgba(229,62,62,0.06); border: 1px solid rgba(229,62,62,0.25); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; color: #c53030; text-align: center; }
+        .tx-link { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); text-decoration: none; margin-bottom: 12px; opacity: 0.7; transition: opacity 0.2s; }
+        .tx-link:hover { opacity: 1; }
 
         @media (max-width: 480px) {
           .tip-card { padding: 24px; border-radius: 16px; }

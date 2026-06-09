@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Sidebar from '@/components/Sidebar';
-import DashboardView from '@/components/DashboardView';
-import TipPageView from '@/components/TipPageView';
+import dynamic from 'next/dynamic';
+
+const ConnectedDashboard = dynamic(() => import('@/components/ConnectedDashboard'), { ssr: false });
 
 interface Creator {
   name: string;
@@ -28,6 +29,9 @@ interface Tip {
 
 export default function Home() {
   const { ready, authenticated, login, user } = usePrivy();
+
+  const wallet = user?.linkedAccounts?.find((a) => a.type === 'wallet');
+  const walletAddress = ((wallet as { address?: string })?.address || '') as `0x${string}` | '';
 
   const [creatorInfo, setCreatorInfo] = useState<Creator>({
     name: '', username: '', bio: '', youtube: '', twitter: '', wallet_address: '',
@@ -70,9 +74,28 @@ export default function Home() {
     fetchData();
   }, [ready, authenticated, user]);
 
-  const handleSaveProfile = async (updatedProfile: Creator) => {
-    const wallet = user?.linkedAccounts?.find((a) => a.type === 'wallet');
-    const address = (wallet as { address?: string })?.address || updatedProfile.wallet_address || '';
+  const handleSaveProfile = async (
+    updatedProfile: Creator,
+    opts?: {
+      isOnChain: boolean;
+      registerCreator: (u: string) => Promise<boolean>;
+      updateUsername: (u: string) => Promise<boolean>;
+    }
+  ) => {
+    const address = walletAddress || updatedProfile.wallet_address || '';
+
+    // Register or update username on-chain if username is set
+    if (updatedProfile.username && opts) {
+      if (!opts.isOnChain) {
+        const ok = await opts.registerCreator(updatedProfile.username);
+        if (!ok) return;
+      } else if (updatedProfile.username !== creatorInfo.username && creatorInfo.username) {
+        const ok = await opts.updateUsername(updatedProfile.username);
+        if (!ok) return;
+      }
+    }
+
+    // Save off-chain metadata to Supabase
     const res = await fetch('/api/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -81,7 +104,6 @@ export default function Home() {
     const data = await res.json();
     if (data.success) {
       setCreatorInfo(data.profile);
-      // Reload tips for new username
       const tipsRes = await fetch(`/api/tips?username=${data.profile.username}`);
       if (tipsRes.ok) setTips(await tipsRes.json());
     }
@@ -153,23 +175,16 @@ export default function Home() {
     <div className="app-container">
       <Sidebar currentView={currentView} setView={setCurrentView} creatorInfo={creatorInfo} />
       <main className="main-content">
-        {currentView === 'dashboard' && (
-          <DashboardView
+        {(currentView === 'dashboard' || currentView === 'preview') && (
+          <ConnectedDashboard
             creatorInfo={creatorInfo}
             setCreatorInfo={setCreatorInfo}
             tips={tips}
+            currentView={currentView}
+            walletAddress={walletAddress}
+            onAddTip={handleAddTip}
             onSaveProfile={handleSaveProfile}
           />
-        )}
-        {currentView === 'preview' && (
-          <div className="preview-container">
-            <div className="preview-banner">
-              <span className="tag-mono">Preview Mode</span>
-              <h2>Tipping Page Live Preview</h2>
-              <p>This is what your fans see. Try the tipping flow to see updates in your dashboard ledger!</p>
-            </div>
-            <TipPageView creatorInfo={creatorInfo} onAddTip={handleAddTip} />
-          </div>
         )}
         {currentView === 'how-it-works' && (
           <div className="how-it-works-wrap">

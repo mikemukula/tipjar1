@@ -41,9 +41,12 @@ interface DashboardViewProps {
   setCreatorInfo: (info: Creator) => void;
   tips: Tip[];
   onSaveProfile: (profile: Creator) => Promise<void>;
+  isOnChain?: boolean;
+  regStatus?: 'idle' | 'pending' | 'success' | 'error';
+  regError?: string | null;
 }
 
-export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSaveProfile }: DashboardViewProps) {
+export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSaveProfile, isOnChain, regStatus, regError }: DashboardViewProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWidget, setCopiedWidget] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -190,8 +193,17 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
               </div>
             </>
           )}
-          <button type="submit" className={`btn-primary btn-save ${saveSuccess ? 'btn-save-success' : ''}`} disabled={saving} style={{ marginTop: '8px', alignSelf: 'flex-start' }}>
-            {saving ? <><Loader2 size={16} className="spin" />Saving…</> : saveSuccess ? <><Check size={16} />Saved!</> : 'Save Changes'}
+          {regError && (
+            <div style={{ fontSize: '0.8rem', color: '#c53030', background: 'rgba(229,62,62,0.06)', border: '1px solid rgba(229,62,62,0.2)', borderRadius: 8, padding: '8px 12px' }}>
+              {regError}
+            </div>
+          )}
+          <button type="submit" className={`btn-primary btn-save ${saveSuccess ? 'btn-save-success' : ''}`} disabled={saving || regStatus === 'pending'} style={{ marginTop: '8px', alignSelf: 'flex-start' }}>
+            {regStatus === 'pending' ? <><Loader2 size={16} className="spin" />Confirm in wallet…</>
+              : saving ? <><Loader2 size={16} className="spin" />Saving…</>
+              : saveSuccess ? <><Check size={16} />Saved!</>
+              : isOnChain ? 'Save Changes'
+              : 'Register & Save'}
           </button>
         </form>
       </div>
