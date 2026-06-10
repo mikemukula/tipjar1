@@ -16,7 +16,6 @@ Creators claim an on-chain username and share a public tip page, QR code, or emb
 | ------------ | ------------------------------------------------------------------ |
 | `web/`       | Next.js app (frontend + API routes) — **this is what gets deployed** |
 | `contracts/` | Foundry project: `TipJarRegistry.sol`, tests, deploy script         |
-| `backend/`   | Legacy Express prototype (superseded by `web/` + Supabase)          |
 
 ## Deployed contracts (Celo mainnet)
 
