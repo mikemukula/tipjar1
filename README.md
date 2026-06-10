@@ -1,67 +1,75 @@
 # G$ Tip Jar
 
-An app built to make tipping creators easy, powered by **GoodDollar (G$)** on **Celo**.
+Tipping platform for creators, powered by **GoodDollar (G$)** on **Celo**.
 
-Tip Jar lets digital creators set up a public tipping page so fans can support them with G$ — GoodDollar's daily Universal Basic Income token.
+Creators claim an on-chain username and share a public tip page, QR code, or embeddable widget. Fans tip G$ straight from their wallet to the creator's wallet — the contract never holds funds, and there are no platform fees.
 
-> **Status:** Prototype — tipping flow is simulated; wallet integration with GoodWallet on Celo is planned.
+## How it works
 
-## Overview
+- **On-chain registry** — usernames are registered on the `TipJarRegistry` contract on Celo mainnet. Tips are wallet-to-wallet `transferFrom` calls in G$.
+- **Creator dashboard** — live G$ balance, tip stats, recent tips, share assets (link / QR / widget), and profile settings.
+- **Public pages** — `/tip/<username>` for fans, `/widget/<username>` for embedding.
 
-**Creator dashboard**
-- Manage profile (name, handle, bio, social links)
-- Track tip analytics and recent messages
-- Share a tipping link, QR code, or embeddable widget
+## Repository structure
 
-**Public tipping page**
-- Fans choose an amount in G$ and optionally leave a message
-- Tips are recorded in a local ledger (simulated for now)
+| Folder       | Description                                                        |
+| ------------ | ------------------------------------------------------------------ |
+| `web/`       | Next.js app (frontend + API routes) — **this is what gets deployed** |
+| `contracts/` | Foundry project: `TipJarRegistry.sol`, tests, deploy script         |
+| `backend/`   | Legacy Express prototype (superseded by `web/` + Supabase)          |
 
-## Tech Stack
+## Deployed contracts (Celo mainnet)
 
-| Layer    | Technology                                       |
-| -------- | ------------------------------------------------ |
-| Frontend | React 19, Vite, Lucide icons, hash-based routing |
-| Backend  | Express.js, CORS                               |
-| Storage  | Local `database.json` (profiles + tip ledger)    |
+| Contract         | Address                                      |
+| ---------------- | -------------------------------------------- |
+| TipJarRegistry   | `0x9c69aa76f0D565eC514563E36bf9371ba7E74F05` |
+| GoodDollar (G$)  | `0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A` |
 
-## Getting Started
+## Tech stack
 
-### Prerequisites
+- **Frontend**: Next.js 16 (App Router), Tailwind CSS 4, next-themes
+- **Auth**: Privy (wallet + email login, embedded wallets)
+- **Web3**: wagmi + viem on Celo
+- **Database**: Supabase (PostgreSQL) for profiles and the tip ledger
+- **Contracts**: Solidity 0.8 + Foundry
 
-- Node.js 18+
-- npm
-
-### 1. Start the backend
+## Local development
 
 ```bash
-cd backend
+cd web
 npm install
 npm run dev
 ```
 
-API runs at `http://localhost:5001`.
+Create `web/.env.local` with:
 
-### 2. Start the frontend
-
-In a separate terminal:
-
-```bash
-cd frontend
-npm install
-npm run dev
+```
+NEXT_PUBLIC_PRIVY_APP_ID=...
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x9c69aa76f0D565eC514563E36bf9371ba7E74F05
+NEXT_PUBLIC_CHAIN_ID=42220
 ```
 
-Open the URL shown in the terminal (typically `http://localhost:5173`).
+## Deploying to Vercel
 
-## API Endpoints
+The app lives in the `web/` subfolder, so point Vercel at it:
 
-| Method | Endpoint       | Description              |
-| ------ | -------------- | ------------------------ |
-| GET    | `/api/profile` | Get creator profile      |
-| POST   | `/api/profile` | Create or update profile |
-| GET    | `/api/tips`    | List all tips            |
-| POST   | `/api/tips`    | Record a new tip         |
+1. Import the GitHub repo in Vercel.
+2. In project settings, set **Root Directory** to `web` (framework preset: Next.js — auto-detected).
+3. Add the environment variables listed above under **Settings → Environment Variables**.
+4. Deploy.
+
+No other configuration is required — API routes deploy as serverless functions automatically.
+
+## Contracts
+
+```bash
+cd contracts
+forge test          # run the test suite
+forge script script/Deploy.s.sol --rpc-url celo --broadcast   # deploy (needs DEPLOYER_PRIVATE_KEY in .env)
+```
 
 ## License
 
