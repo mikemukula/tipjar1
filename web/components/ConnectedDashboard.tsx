@@ -1,6 +1,7 @@
 'use client';
 
 import { useRegisterCreator, useIsRegistered } from '@/hooks/useRegisterCreator';
+import { useGDollarBalance } from '@/hooks/useGDollarBalance';
 import DashboardView from './DashboardView';
 import TipPageView from './TipPageView';
 import type { Creator, Tip } from '@/providers/CreatorProvider';
@@ -34,6 +35,7 @@ export default function ConnectedDashboard({
   const { registerCreator, updateUsername, status: regStatus, error: regError } =
     useRegisterCreator(walletAddress || undefined);
   const { data: isOnChain } = useIsRegistered(walletAddress || undefined);
+  const { balance: gBalance, isLoading: balanceLoading } = useGDollarBalance(walletAddress || undefined);
 
   const handleSave = (profile: Creator) =>
     onSaveProfile(profile, {
@@ -70,6 +72,8 @@ export default function ConnectedDashboard({
       isOnChain={!!isOnChain}
       regStatus={regStatus}
       regError={regError}
+      gBalance={gBalance}
+      balanceLoading={balanceLoading}
     />
   );
 }

@@ -25,9 +25,11 @@ interface DashboardViewProps {
   isOnChain?: boolean;
   regStatus?: 'idle' | 'pending' | 'success' | 'error';
   regError?: string | null;
+  gBalance?: number | null;
+  balanceLoading?: boolean;
 }
 
-export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSaveProfile, isOnChain, regStatus, regError }: DashboardViewProps) {
+export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSaveProfile, isOnChain, regStatus, regError, gBalance, balanceLoading }: DashboardViewProps) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWidget, setCopiedWidget] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -81,10 +83,17 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
   const avgTip = tips.length > 0 ? Math.round(totalTips / tips.length) : 0;
   const bioLength = (creatorInfo.bio || '').length;
 
+  const balanceDisplay = balanceLoading && gBalance === null
+    ? '…'
+    : gBalance !== null && gBalance !== undefined
+      ? gBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })
+      : '—';
+
   const statCards = [
-    { label: 'Total Tips Received', value: totalTips.toLocaleString(), suffix: 'G$', desc: 'All-time earnings', accent: '#111111', progress: 0.78 },
-    { label: 'Tips Volume', value: tips.length, suffix: null, desc: 'Individual payments', accent: '#999999', progress: 0.54 },
-    { label: 'Average Tip', value: avgTip, suffix: 'G$', desc: 'Per fan interaction', accent: '#cccccc', progress: 0.35 },
+    { label: 'Wallet Balance', value: balanceDisplay, suffix: 'G$', desc: 'Live on-chain balance', accent: '#1a7a38', progress: 1, live: true },
+    { label: 'Total Tips Received', value: totalTips.toLocaleString(), suffix: 'G$', desc: 'All-time earnings', accent: '#111111', progress: 0.78, live: false },
+    { label: 'Tips Volume', value: tips.length, suffix: null, desc: 'Individual payments', accent: '#999999', progress: 0.54, live: false },
+    { label: 'Average Tip', value: avgTip, suffix: 'G$', desc: 'Per fan interaction', accent: '#cccccc', progress: 0.35, live: false },
   ];
 
   return (
@@ -128,6 +137,7 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
             <div className="stat-card-top">
               <span className="stat-accent-dot" style={{ background: card.accent }} />
               <span className="stat-label">{card.label}</span>
+              {card.live && <span className="stat-live-badge">Live</span>}
             </div>
             <h2 className="stat-value">{card.value}{card.suffix && <span className="stat-currency"> {card.suffix}</span>}</h2>
             <span className="stat-desc">{card.desc}</span>
@@ -304,7 +314,9 @@ export default function DashboardView({ creatorInfo, setCreatorInfo, tips, onSav
         .btn-copy-link:hover:not(:disabled) { background: #222; }
         .btn-copy-link:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        .analytics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+        .analytics-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+        .stat-live-badge { margin-left: auto; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #1a7a38; background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.2); border-radius: 999px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px; }
+        .stat-live-badge::before { content: ''; width: 4px; height: 4px; background: #34c759; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
         .stat-card { display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden; }
         .stat-card-top { display: flex; align-items: center; gap: 8px; }
         .stat-accent-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
