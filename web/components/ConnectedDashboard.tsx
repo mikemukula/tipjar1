@@ -46,19 +46,17 @@ export default function ConnectedDashboard({
 
   if (currentView === 'preview') {
     return (
-      <div className="preview-container">
-        <div className="preview-banner">
-          <span className="tag-mono">Preview Mode</span>
-          <h2>Your Public Tip Page</h2>
-          <p>This is exactly what fans see when they visit your tipping link.</p>
+      <div className="flex animate-fade-up flex-col items-center gap-6">
+        <div className="max-w-md text-center">
+          <span className="rounded-full border border-line bg-card px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Preview
+          </span>
+          <h2 className="mt-3 font-display text-2xl font-bold tracking-tight">Your public tip page</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This is exactly what fans see when they visit your link.
+          </p>
         </div>
         <TipPageView creatorInfo={creatorInfo} onAddTip={onAddTip} />
-        <style>{`
-          .preview-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-          .preview-banner { text-align: center; max-width: 560px; }
-          .preview-banner h2 { font-family: var(--font-mono); font-size: 1.6rem; margin-top: 6px; }
-          .preview-banner p { font-size: 0.875rem; color: var(--text-secondary); margin-top: 6px; }
-        `}</style>
       </div>
     );
   }

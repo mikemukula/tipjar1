@@ -27,24 +27,23 @@ export default function TipPageClient({ username }: { username: string }) {
 
   if (notFound) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-        <p style={{ fontFamily: 'monospace', fontSize: '1.1rem' }}>Creator not found</p>
-        <p style={{ fontSize: '0.85rem', opacity: 0.5 }}>@{username} has not registered yet.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-2 p-6 text-center">
+        <p className="font-display text-lg font-bold">Creator not found</p>
+        <p className="text-sm text-muted-foreground">@{username} has not registered yet.</p>
       </div>
     );
   }
 
   if (!creatorInfo) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '2px solid rgba(10,10,10,0.1)', borderTopColor: '#0a0a0a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-foreground" />
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div className="flex min-h-screen items-center justify-center p-6">
       <TipPageView creatorInfo={creatorInfo} onAddTip={handleAddTip} />
     </div>
   );

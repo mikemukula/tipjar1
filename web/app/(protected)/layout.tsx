@@ -20,13 +20,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="loading-screen">
-        <div className="spinner" />
-        <style>{`
-          .loading-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; }
-          .spinner { width:32px; height:32px; border:2px solid rgba(10,10,10,0.1); border-top-color:#0a0a0a; border-radius:50%; animation:spin 0.8s linear infinite; }
-          @keyframes spin { to { transform:rotate(360deg); } }
-        `}</style>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-foreground" />
       </div>
     );
   }
@@ -40,10 +35,10 @@ function ProtectedShell({ children }: { children: React.ReactNode }) {
   const { creator, walletAddress } = useCreator();
 
   return (
-    <div className="app-container">
+    <div className="min-h-screen">
       <Sidebar creatorInfo={creator} walletAddress={walletAddress} />
       <Navbar username={creator.username} walletAddress={walletAddress || undefined} />
-      <main className="main-content">
+      <main className="ml-60 min-h-screen px-8 pt-22 pb-10 max-md:ml-0 max-md:px-4 max-md:pt-20 max-md:pb-24">
         {children}
       </main>
     </div>

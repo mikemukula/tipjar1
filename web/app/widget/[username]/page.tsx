@@ -24,7 +24,7 @@ export default function WidgetPage({ params }: { params: { username: string } })
   if (!creatorInfo) return null;
 
   return (
-    <div style={{ background: '#050505', minHeight: '100vh', width: '100%' }}>
+    <div className="min-h-screen w-full bg-background p-3">
       <TipPageView creatorInfo={creatorInfo} onAddTip={handleAddTip} isWidget={true} />
     </div>
   );
