@@ -2,27 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Eye, Info, LogOut, ArrowUpRight } from 'lucide-react';
+import { LayoutDashboard, Eye, Info, LogOut, ArrowUpRight, Share2, Settings } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useCreator } from '@/providers/CreatorProvider';
 
-interface Creator {
-  name: string;
-  username: string;
-  wallet_address?: string;
-}
-
-interface SidebarProps {
-  creatorInfo: Creator;
-  walletAddress?: string;
-}
-
-export default function Sidebar({ creatorInfo }: SidebarProps) {
+export default function Sidebar() {
   const { logout } = usePrivy();
   const pathname = usePathname();
+  const { creator: creatorInfo } = useCreator();
 
   const menuItems = [
     { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+    { href: '/share',        label: 'Share',        icon: Share2 },
     { href: '/preview',      label: 'Tip Page',     icon: Eye },
+    { href: '/settings',     label: 'Settings',     icon: Settings },
     { href: '/how-it-works', label: 'How it Works', icon: Info },
   ];
 

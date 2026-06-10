@@ -33,14 +33,6 @@ interface CreatorContextValue {
   setCreator: (c: Creator) => void;
   setTips: (t: Tip[]) => void;
   refreshTips: () => Promise<void>;
-  saveProfile: (
-    updated: Creator,
-    opts?: {
-      isOnChain: boolean;
-      registerCreator: (u: string) => Promise<boolean>;
-      updateUsername: (u: string) => Promise<boolean>;
-    }
-  ) => Promise<void>;
   addTip: (tip: Tip) => Promise<void>;
 }
 
@@ -84,39 +76,6 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     if (res.ok) setTips(await res.json());
   };
 
-  const saveProfile = async (
-    updated: Creator,
-    opts?: {
-      isOnChain: boolean;
-      registerCreator: (u: string) => Promise<boolean>;
-      updateUsername: (u: string) => Promise<boolean>;
-    }
-  ) => {
-    const address = walletAddress || updated.wallet_address || '';
-
-    if (updated.username && opts) {
-      if (!opts.isOnChain) {
-        const ok = await opts.registerCreator(updated.username);
-        if (!ok) return;
-      } else if (updated.username !== creator.username && creator.username) {
-        const ok = await opts.updateUsername(updated.username);
-        if (!ok) return;
-      }
-    }
-
-    const res = await fetch('/api/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...updated, wallet_address: address }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setCreator(data.profile);
-      const tipsRes = await fetch(`/api/tips?username=${data.profile.username}`);
-      if (tipsRes.ok) setTips(await tipsRes.json());
-    }
-  };
-
   const addTip = async (newTip: Tip) => {
     const res = await fetch('/api/tips', {
       method: 'POST',
@@ -131,8 +90,7 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
   return (
     <CreatorContext.Provider value={{
       creator, tips, isLoading, walletAddress,
-      setCreator, setTips, refreshTips,
-      saveProfile, addTip,
+      setCreator, setTips, refreshTips, addTip,
     }}>
       {children}
     </CreatorContext.Provider>

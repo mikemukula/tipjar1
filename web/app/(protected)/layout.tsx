@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
-import { CreatorProvider, useCreator } from '@/providers/CreatorProvider';
+import { CreatorProvider } from '@/providers/CreatorProvider';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { ready, authenticated, login } = usePrivy();
@@ -52,25 +52,17 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function ProtectedShell({ children }: { children: React.ReactNode }) {
-  const { creator, walletAddress } = useCreator();
-
-  return (
-    <div className="min-h-screen">
-      <Sidebar creatorInfo={creator} walletAddress={walletAddress} />
-      <Navbar username={creator.username} walletAddress={walletAddress || undefined} />
-      <main className="ml-60 min-h-screen px-8 pt-22 pb-10 max-md:ml-0 max-md:px-4 max-md:pt-20 max-md:pb-24">
-        {children}
-      </main>
-    </div>
-  );
-}
-
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <CreatorProvider>
-        <ProtectedShell>{children}</ProtectedShell>
+        <div className="min-h-screen">
+          <Sidebar />
+          <Navbar />
+          <main className="ml-60 min-h-screen px-8 pt-22 pb-10 max-md:ml-0 max-md:px-4 max-md:pt-20 max-md:pb-24">
+            {children}
+          </main>
+        </div>
       </CreatorProvider>
     </AuthGuard>
   );

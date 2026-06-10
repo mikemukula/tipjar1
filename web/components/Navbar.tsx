@@ -4,15 +4,13 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Check, Share2, Sun, Moon } from 'lucide-react';
-
-interface NavbarProps {
-  username: string;
-  walletAddress?: string;
-}
+import { useCreator } from '@/providers/CreatorProvider';
 
 const PAGE_LABELS: Record<string, string> = {
   '/dashboard':    'Dashboard',
+  '/share':        'Share',
   '/preview':      'Tip Page',
+  '/settings':     'Settings',
   '/how-it-works': 'How it Works',
 };
 
@@ -20,11 +18,13 @@ function shortAddr(addr: string) {
   return addr.slice(0, 6) + '…' + addr.slice(-4);
 }
 
-export default function Navbar({ username, walletAddress }: NavbarProps) {
+export default function Navbar() {
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { creator, walletAddress } = useCreator();
+  const username = creator.username;
 
   useEffect(() => setMounted(true), []);
 
