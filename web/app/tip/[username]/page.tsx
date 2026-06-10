@@ -1,5 +1,6 @@
 import TipPageClient from './TipPageClient';
 
-export default function TipPage({ params }: { params: { username: string } }) {
-  return <TipPageClient username={params.username} />;
+export default async function TipPage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  return <TipPageClient username={username} />;
 }

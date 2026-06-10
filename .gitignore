@@ -7,9 +7,12 @@ web/.next/
 web/out/
 
 # Env files (never commit secrets)
+.env
+**/.env
 .env.local
 **/.env.local
 .env*.local
+!**/.env.example
 
 # Build output
 web/build/

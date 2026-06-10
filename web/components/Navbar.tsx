@@ -1,200 +1,88 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Check, Share2, ChevronRight } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { Check, Share2, Sun, Moon } from 'lucide-react';
+import { useCreator } from '@/providers/CreatorProvider';
 
-interface NavbarProps {
-  username: string;
-  walletAddress?: string;
-}
-
-const PAGE_LABELS: Record<string, { label: string; sub: string }> = {
-  '/dashboard':    { label: 'Dashboard',    sub: 'Creator overview & settings' },
-  '/preview':      { label: 'Tip Page',     sub: 'Live preview & sharing' },
-  '/how-it-works': { label: 'How it Works', sub: 'Platform guide' },
+const PAGE_LABELS: Record<string, string> = {
+  '/dashboard':    'Dashboard',
+  '/share':        'Share',
+  '/preview':      'Tip Page',
+  '/settings':     'Settings',
+  '/how-it-works': 'How it Works',
 };
 
 function shortAddr(addr: string) {
   return addr.slice(0, 6) + '…' + addr.slice(-4);
 }
 
-export default function Navbar({ username, walletAddress }: NavbarProps) {
+export default function Navbar() {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const { creator, walletAddress } = useCreator();
+  const username = creator.username;
 
-  const tipUrl = typeof window !== 'undefined' && username
-    ? `${window.location.origin}/tip/${username}`
-    : '';
+  useEffect(() => setMounted(true), []);
 
   const copyLink = () => {
-    if (!tipUrl) return;
-    navigator.clipboard.writeText(tipUrl);
+    if (!username) return;
+    navigator.clipboard.writeText(`${window.location.origin}/tip/${username}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const page = PAGE_LABELS[pathname] ?? PAGE_LABELS['/dashboard'];
-
   return (
-    <header className="topnav">
-      {/* Left — breadcrumb */}
-      <div className="topnav-left">
-        <div className="breadcrumb">
-          <span className="breadcrumb-root">G$ Tip Jar</span>
-          <ChevronRight size={13} className="breadcrumb-sep" />
-          <span className="breadcrumb-current">{page.label}</span>
-        </div>
-        <p className="topnav-sub">{page.sub}</p>
-      </div>
+    <header className="fixed top-0 right-0 left-60 z-30 flex h-14 items-center justify-between border-b border-line bg-background/80 px-6 backdrop-blur-md max-md:left-0">
+      {/* Left — page title */}
+      <h1 className="font-display text-[15px] font-semibold tracking-tight">
+        {PAGE_LABELS[pathname] ?? 'Dashboard'}
+      </h1>
 
       {/* Right — actions */}
-      <div className="topnav-right">
-        {/* Network badge */}
-        <div className="network-badge">
-          <span className="network-dot" />
-          <span>Celo Mainnet</span>
-        </div>
+      <div className="flex items-center gap-2">
+        {/* Network */}
+        <span className="flex items-center gap-1.5 rounded-full bg-success-bg px-2.5 py-1 font-mono text-[11px] font-semibold text-success max-sm:hidden">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
+          Celo
+        </span>
 
         {/* Wallet */}
         {walletAddress && (
-          <div className="wallet-chip">
-            <span className="wallet-chip-addr">{shortAddr(walletAddress)}</span>
-          </div>
+          <span className="rounded-full border border-line bg-card px-2.5 py-1 font-mono text-[11px] text-muted-foreground max-sm:hidden">
+            {shortAddr(walletAddress)}
+          </span>
         )}
 
-        {/* Share tip link */}
+        {/* Theme toggle */}
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-card text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+        )}
+
+        {/* Share */}
         {username && (
-          <button onClick={copyLink} className={`share-btn ${copied ? 'share-btn-done' : ''}`}>
-            {copied
-              ? <><Check size={14} /><span>Copied!</span></>
-              : <><Share2 size={14} /><span>Share tip link</span></>}
+          <button
+            onClick={copyLink}
+            className={`flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-all ${
+              copied
+                ? 'bg-success text-white'
+                : 'bg-primary text-primary-foreground hover:opacity-90'
+            }`}
+          >
+            {copied ? <Check size={14} /> : <Share2 size={14} />}
+            <span className="max-sm:hidden">{copied ? 'Copied!' : 'Share'}</span>
           </button>
         )}
       </div>
-
-      <style>{`
-        .topnav {
-          position: fixed;
-          top: 0;
-          left: var(--sidebar-width);
-          right: 0;
-          height: 60px;
-          background: rgba(250, 250, 247, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid var(--border-glass);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 32px;
-          z-index: 90;
-          gap: 16px;
-        }
-        .topnav-left {
-          display: flex;
-          flex-direction: column;
-          gap: 1px;
-          min-width: 0;
-        }
-        .breadcrumb {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-        }
-        .breadcrumb-root { opacity: 0.6; }
-        .breadcrumb-sep { opacity: 0.4; flex-shrink: 0; }
-        .breadcrumb-current { color: var(--text-primary); opacity: 1; }
-        .topnav-sub {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-          line-height: 1;
-          margin: 0;
-        }
-        .topnav-right {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-shrink: 0;
-        }
-        .network-badge {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(52, 199, 89, 0.08);
-          border: 1px solid rgba(52, 199, 89, 0.2);
-          border-radius: 999px;
-          padding: 5px 12px;
-          font-family: var(--font-mono);
-          font-size: 0.7rem;
-          font-weight: 600;
-          color: #1a7a38;
-          letter-spacing: 0.04em;
-          white-space: nowrap;
-        }
-        .network-dot {
-          width: 6px;
-          height: 6px;
-          background: #34c759;
-          border-radius: 50%;
-          flex-shrink: 0;
-          animation: statusPulse 2.5s ease-in-out infinite;
-          color: #34c759;
-        }
-        .wallet-chip {
-          background: rgba(255,255,255,0.7);
-          border: 1px solid var(--border-glass);
-          border-radius: 999px;
-          padding: 5px 12px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-        .wallet-chip-addr {
-          font-family: var(--font-mono);
-          font-size: 0.72rem;
-          color: var(--text-secondary);
-          letter-spacing: 0.02em;
-        }
-        .share-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          background: var(--text-primary);
-          color: #fff;
-          border: none;
-          border-radius: 8px;
-          padding: 7px 14px;
-          font-family: var(--font-sans);
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.25s var(--ease-out-expo);
-          white-space: nowrap;
-        }
-        .share-btn:hover { background: #222; transform: translateY(-1px); }
-        .share-btn-done { background: #1a7a38 !important; transform: none !important; }
-
-        @media (max-width: 768px) {
-          .topnav {
-            left: 0;
-            top: 56px;
-            padding: 0 16px;
-            height: 52px;
-          }
-          .topnav-sub, .wallet-chip { display: none; }
-          .network-badge span { display: none; }
-          .network-badge { padding: 5px 8px; }
-          .share-btn span { display: none; }
-          .share-btn { padding: 7px 10px; }
-        }
-      `}</style>
     </header>
   );
 }

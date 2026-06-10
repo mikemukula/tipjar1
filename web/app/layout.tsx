@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import PrivyClientProvider from '@/providers/PrivyClientProvider';
 
@@ -9,9 +10,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <PrivyClientProvider>{children}</PrivyClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <PrivyClientProvider>{children}</PrivyClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
