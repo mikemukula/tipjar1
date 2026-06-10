@@ -167,18 +167,7 @@ export default function LandingPage() {
       {/* ─── Hero ───────────────────────────────────────────── */}
       <section className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-12 px-5 pt-36 pb-20 max-lg:grid-cols-1 max-lg:pt-30 max-lg:pb-12">
         <div className="animate-fade-up">
-          <a
-            href="https://celoscan.io/address/0x9c69aa76f0D565eC514563E36bf9371ba7E74F05"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3.5 py-1.5 font-mono text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
-            Live on Celo Mainnet
-            <ArrowUpRight size={11} className="opacity-50" />
-          </a>
-
-          <h1 className="mt-6 font-display text-[56px] leading-[1.04] font-bold tracking-tight max-md:text-4xl">
+          <h1 className="font-display text-[56px] leading-[1.04] font-bold tracking-tight max-md:text-4xl">
             Get tipped in{' '}
             <span className="relative inline-block">
               <span className="relative z-10">G$</span>
