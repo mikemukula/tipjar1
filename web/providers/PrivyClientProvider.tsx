@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider, createConfig } from '@privy-io/wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useTheme } from 'next-themes';
 import { http } from 'viem';
 import { defineChain } from 'viem';
 
@@ -24,6 +25,7 @@ const queryClient = new QueryClient();
 
 export default function PrivyClientProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
   useEffect(() => { setMounted(true); }, []);
 
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
@@ -32,11 +34,18 @@ export default function PrivyClientProvider({ children }: { children: React.Reac
     return <>{children}</>;
   }
 
+  const isDark = resolvedTheme === 'dark';
+
   return (
     <PrivyProvider
       appId={appId}
       config={{
-        appearance: { theme: 'light', accentColor: '#0a0a0a' },
+        appearance: {
+          // Match the site's card/primary tokens in each theme
+          theme: isDark ? '#151513' : '#ffffff',
+          accentColor: isDark ? '#fcff52' : '#161614',
+          landingHeader: 'Sign in to Tip Jar',
+        },
         loginMethods: ['wallet', 'email'],
         defaultChain: celo,
         supportedChains: [celo],

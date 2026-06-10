@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 import { useTheme } from 'next-themes';
 import {
   ArrowRight, ArrowUpRight, Sun, Moon, BadgeCheck, Heart,
@@ -42,8 +44,26 @@ export default function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+  const { ready, authenticated, login } = usePrivy();
+  const [launching, setLaunching] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  // After the in-page Privy modal completes, move to the dashboard
+  useEffect(() => {
+    if (launching && ready && authenticated) router.push('/dashboard');
+  }, [launching, ready, authenticated, router]);
+
+  // Pop the Privy modal in place; only navigate once signed in
+  const launchApp = useCallback(() => {
+    if (authenticated) {
+      router.push('/dashboard');
+    } else {
+      setLaunching(true);
+      login();
+    }
+  }, [authenticated, router, login]);
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
@@ -100,13 +120,13 @@ export default function LandingPage() {
                 {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
               </button>
             )}
-            <Link
-              href="/dashboard"
+            <button
+              onClick={launchApp}
               className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 max-md:hidden"
             >
               Launch app
               <ArrowRight size={14} />
-            </Link>
+            </button>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="hidden h-9 w-9 items-center justify-center rounded-lg border border-line bg-card max-md:flex"
@@ -133,13 +153,13 @@ export default function LandingPage() {
                 {label}
               </a>
             ))}
-            <Link
-              href="/dashboard"
+            <button
+              onClick={() => { setMenuOpen(false); launchApp(); }}
               className="mt-2 flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary text-sm font-bold text-primary-foreground"
             >
               Launch app
               <ArrowRight size={14} />
-            </Link>
+            </button>
           </div>
         )}
       </header>
@@ -174,13 +194,13 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-8 flex items-center gap-3 max-sm:flex-col max-sm:items-stretch">
-            <Link
-              href="/dashboard"
+            <button
+              onClick={launchApp}
               className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-7 text-[15px] font-bold text-primary-foreground transition-all hover:opacity-90 hover:shadow-lg"
             >
               Start earning
               <ArrowRight size={16} />
-            </Link>
+            </button>
             <a
               href="#how-it-works"
               className="flex h-12 items-center justify-center rounded-xl border border-line bg-card px-7 text-[15px] font-semibold transition-colors hover:border-foreground/30"
@@ -394,13 +414,13 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-md text-[15px] text-muted-foreground">
             Claim your on-chain username and share your tip link in under a minute.
           </p>
-          <Link
-            href="/dashboard"
+          <button
+            onClick={launchApp}
             className="mt-8 inline-flex h-13 items-center gap-2 rounded-xl bg-primary px-8 text-base font-bold text-primary-foreground transition-all hover:opacity-90 hover:shadow-xl"
           >
             Launch the app
             <ArrowRight size={17} />
-          </Link>
+          </button>
         </div>
       </section>
 
