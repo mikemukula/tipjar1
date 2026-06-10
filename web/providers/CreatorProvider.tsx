@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { useWallets } from '@privy-io/react-auth';
 
 export interface Creator {
   id?: string;
@@ -39,10 +39,9 @@ interface CreatorContextValue {
 const CreatorContext = createContext<CreatorContextValue | null>(null);
 
 export function CreatorProvider({ children }: { children: ReactNode }) {
-  const { user } = usePrivy();
-
-  const walletAccount = user?.linkedAccounts?.find((a) => a.type === 'wallet');
-  const walletAddress = ((walletAccount as { address?: string })?.address ?? '') as `0x${string}` | '';
+  // wallets[0] is the most recently connected wallet — follows the active login
+  const { wallets } = useWallets();
+  const walletAddress = (wallets[0]?.address ?? '') as `0x${string}` | '';
 
   const [creator, setCreator] = useState<Creator>({
     username: '', wallet_address: '', name: '', bio: '', youtube: '', twitter: '',
@@ -50,9 +49,17 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
   const [tips, setTips] = useState<Tip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load profile once wallet is known
+  // (Re)load the profile whenever the active wallet changes
   useEffect(() => {
+    const emptyCreator: Creator = {
+      username: '', wallet_address: walletAddress, name: '', bio: '', youtube: '', twitter: '',
+    };
+    // Reset state so a wallet switch never shows the previous wallet's data
+    setCreator(emptyCreator);
+    setTips([]);
+
     if (!walletAddress) { setIsLoading(false); return; }
+    setIsLoading(true);
     (async () => {
       try {
         const res = await fetch(`/api/profile?wallet=${walletAddress}`);
@@ -61,8 +68,6 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
           setCreator(profile);
           const tipsRes = await fetch(`/api/tips?username=${profile.username}`);
           if (tipsRes.ok) setTips(await tipsRes.json());
-        } else {
-          setCreator((prev) => ({ ...prev, wallet_address: walletAddress }));
         }
       } finally {
         setIsLoading(false);

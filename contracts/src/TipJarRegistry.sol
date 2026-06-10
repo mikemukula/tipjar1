@@ -13,7 +13,7 @@ import {ReentrancyGuard} from "./utils/ReentrancyGuard.sol";
  * Tips flow directly from fan → creator wallet via G$ transferFrom.
  * No funds are ever held by this contract.
  *
- * G$ (GoodDollar) on Celo: 0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c14
+ * G$ (GoodDollar) on Celo: 0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A
  */
 contract TipJarRegistry is Ownable, ReentrancyGuard {
     // ─── State ────────────────────────────────────────────────────────────────

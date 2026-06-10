@@ -385,7 +385,7 @@ export default function LandingPage() {
           <div className="flex flex-col gap-3">
             {[
               ['TipJarRegistry', '0x9c69aa76f0D565eC514563E36bf9371ba7E74F05'],
-              ['GoodDollar (G$)', '0x62B8b11039fcfe5Ab0c56E502B1c372a3d2a9C14'],
+              ['GoodDollar (G$)', '0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A'],
             ].map(([label, addr]) => (
               <a
                 key={addr}
