@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Check, ExternalLink, Loader2, BadgeCheck } from 'lucide-react';
+import { ArrowRight, Check, ExternalLink, Loader2, BadgeCheck, Wallet } from 'lucide-react';
+import { usePrivy } from '@privy-io/react-auth';
 import { useSendTip } from '@/hooks/useSendTip';
 import type { Creator, Tip } from '@/providers/CreatorProvider';
 
@@ -20,6 +21,7 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
   const [senderName, setSenderName] = useState('');
 
   const { sendTip, status, txHash, error: tipError, reset: resetTip } = useSendTip();
+  const { ready, authenticated, login } = usePrivy();
 
   const isSending = status === 'approving' || status === 'approved' || status === 'sending';
   const isSuccess = status === 'success';
@@ -152,17 +154,29 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={activeAmount <= 0 || isSending}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              {isSending ? (
-                <><Loader2 size={16} className="animate-spin" />{sendingLabel}</>
-              ) : (
-                <>Send {activeAmount > 0 ? `${activeAmount} G$` : 'tip'}<ArrowRight size={16} /></>
-              )}
-            </button>
+            {authenticated ? (
+              <button
+                type="submit"
+                disabled={activeAmount <= 0 || isSending}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                {isSending ? (
+                  <><Loader2 size={16} className="animate-spin" />{sendingLabel}</>
+                ) : (
+                  <>Send {activeAmount > 0 ? `${activeAmount} G$` : 'tip'}<ArrowRight size={16} /></>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={login}
+                disabled={!ready}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                <Wallet size={16} />
+                Connect wallet to tip
+              </button>
+            )}
           </form>
         </div>
       ) : (
