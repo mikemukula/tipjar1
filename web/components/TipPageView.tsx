@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { ArrowRight, Check, ExternalLink, Loader2, BadgeCheck, Wallet } from 'lucide-react';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useSendTip } from '@/hooks/useSendTip';
+import { useGDollarBalance } from '@/hooks/useGDollarBalance';
 import type { Creator, Tip } from '@/providers/CreatorProvider';
 
 interface TipPageViewProps {
@@ -12,16 +13,16 @@ interface TipPageViewProps {
   isWidget?: boolean;
 }
 
-const PRESETS = [10, 50, 100, 500];
-
 export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }: TipPageViewProps) {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
   const [customAmount, setCustomAmount] = useState('');
   const [message, setMessage] = useState('');
   const [senderName, setSenderName] = useState('');
 
   const { sendTip, status, txHash, error: tipError, reset: resetTip } = useSendTip();
   const { ready, authenticated, login } = usePrivy();
+  const { wallets } = useWallets();
+  const senderWallet = (wallets[0]?.address ?? '') as `0x${string}` | '';
+  const { balance: walletBalance, isLoading: balanceLoading } = useGDollarBalance(senderWallet || undefined);
 
   const isSending = status === 'approving' || status === 'approved' || status === 'sending';
   const isSuccess = status === 'success';
@@ -31,14 +32,18 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
     status === 'approved'  ? 'Approval confirmed…' :
     'Sending tip…';
 
-  const activeAmount = selectedAmount !== null ? selectedAmount : (parseInt(customAmount) || 0);
+  const activeAmount = parseFloat(customAmount) || 0;
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === '' || /^\d+$/.test(value)) {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setCustomAmount(value);
-      setSelectedAmount(null);
     }
+  };
+
+  const handleSetMax = () => {
+    if (walletBalance == null || walletBalance <= 0) return;
+    setCustomAmount(String(walletBalance));
   };
 
   const handleSubmitTip = async (e: React.FormEvent) => {
@@ -67,7 +72,6 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
     resetTip();
     setMessage('');
     setSenderName('');
-    setSelectedAmount(50);
     setCustomAmount('');
   };
 
@@ -106,30 +110,32 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
           <form onSubmit={handleSubmitTip} className="flex flex-col gap-4">
             <div>
               <label className="mb-2 block text-xs font-semibold text-muted-foreground">Amount (G$)</label>
-              <div className="grid grid-cols-4 gap-2">
-                {PRESETS.map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => { setSelectedAmount(amt); setCustomAmount(''); }}
-                    className={`rounded-lg border py-2.5 font-mono text-sm font-semibold transition-all ${
-                      selectedAmount === amt
-                        ? 'border-transparent bg-primary text-primary-foreground'
-                        : 'border-line text-muted-foreground hover:border-foreground/30 hover:text-foreground'
-                    }`}
-                  >
-                    {amt}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Enter amount"
+                  value={customAmount}
+                  onChange={handleCustomAmountChange}
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={handleSetMax}
+                  disabled={!authenticated || walletBalance == null || walletBalance <= 0}
+                  className="h-10 rounded-lg border border-line bg-card px-3 text-xs font-semibold transition-colors hover:border-foreground/30 disabled:opacity-40"
+                >
+                  Max
+                </button>
               </div>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="Custom amount"
-                value={customAmount}
-                onChange={handleCustomAmountChange}
-                className={`${inputClass} mt-2`}
-              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Your balance:{' '}
+                {balanceLoading
+                  ? 'Loading...'
+                  : walletBalance != null
+                    ? `${walletBalance.toLocaleString(undefined, { maximumFractionDigits: 4 })} G$`
+                    : 'Connect wallet to view'}
+              </p>
             </div>
 
             <input

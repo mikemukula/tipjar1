@@ -7,9 +7,10 @@ import { useCreator } from '@/providers/CreatorProvider';
 import { useGDollarBalance } from '@/hooks/useGDollarBalance';
 
 export default function DashboardHome() {
-  const { creator, tips, tipStats, walletAddress } = useCreator();
+  const { creator, tips, sentTips, tipStats, walletAddress } = useCreator();
   const { balance: gBalance, isLoading: balanceLoading } = useGDollarBalance(walletAddress || undefined);
   const [copied, setCopied] = useState(false);
+  const [activeLedgerTab, setActiveLedgerTab] = useState<'received' | 'sent'>('received');
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const tipLink = `${origin}/tip/${creator.username || 'username'}`;
@@ -104,37 +105,80 @@ export default function DashboardHome() {
 
       {/* Tips ledger */}
       <section className="rounded-xl border border-line bg-card p-6">
-        <div className="mb-4 flex items-center gap-2.5">
+        <div className="mb-4 flex items-center justify-between gap-2.5">
           <MessageSquare size={17} className="text-muted-foreground" />
-          <h3 className="font-display text-[15px] font-semibold">Recent tips</h3>
+          <h3 className="font-display text-[15px] font-semibold">Tip history</h3>
+          <div className="flex items-center rounded-lg border border-line bg-background p-1 text-xs">
+            <button
+              onClick={() => setActiveLedgerTab('received')}
+              className={`rounded-md px-2.5 py-1 font-semibold transition-colors ${
+                activeLedgerTab === 'received'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Received
+            </button>
+            <button
+              onClick={() => setActiveLedgerTab('sent')}
+              className={`rounded-md px-2.5 py-1 font-semibold transition-colors ${
+                activeLedgerTab === 'sent'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Sent
+            </button>
+          </div>
         </div>
 
-        {tips.length === 0 ? (
+        {activeLedgerTab === 'received' && tips.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12 text-center">
             <Heart size={28} className="text-muted-foreground/30" />
             <p className="text-sm font-semibold">No tips yet</p>
             <p className="text-xs text-muted-foreground">Share your link to start receiving G$.</p>
+          </div>
+        ) : activeLedgerTab === 'sent' && sentTips.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-12 text-center">
+            <Heart size={28} className="text-muted-foreground/30" />
+            <p className="text-sm font-semibold">No sent tips yet</p>
+            <p className="text-xs text-muted-foreground">Tip a creator to see your sent history here.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-line text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="pb-2.5 pr-4 font-semibold">From</th>
+                  <th className="pb-2.5 pr-4 font-semibold">
+                    {activeLedgerTab === 'received' ? 'From' : 'To'}
+                  </th>
                   <th className="pb-2.5 pr-4 font-semibold">Message</th>
                   <th className="pb-2.5 pr-4 font-semibold">Amount</th>
                   <th className="pb-2.5 font-semibold">Date</th>
                 </tr>
               </thead>
               <tbody>
-                {tips.map((tip) => (
+                {(activeLedgerTab === 'received' ? tips : sentTips).map((tip) => (
                   <tr key={tip.id || tip.created_at} className="border-b border-line/60 last:border-0">
                     <td className="py-3 pr-4">
-                      <p className="font-semibold">{tip.sender_name}</p>
-                      {tip.sender_address && (
-                        <p className="font-mono text-[11px] text-muted-foreground">
-                          {tip.sender_address.slice(0, 6)}…{tip.sender_address.slice(-4)}
-                        </p>
+                      {activeLedgerTab === 'received' ? (
+                        <>
+                          <p className="font-semibold">{tip.sender_name}</p>
+                          {tip.sender_address && (
+                            <p className="font-mono text-[11px] text-muted-foreground">
+                              {tip.sender_address.slice(0, 6)}…{tip.sender_address.slice(-4)}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold">@{tip.creator_username}</p>
+                          {tip.tx_hash && (
+                            <p className="font-mono text-[11px] text-muted-foreground">
+                              tx {tip.tx_hash.slice(0, 10)}…
+                            </p>
+                          )}
+                        </>
                       )}
                     </td>
                     <td className="max-w-xs py-3 pr-4 text-muted-foreground italic">
@@ -142,7 +186,7 @@ export default function DashboardHome() {
                     </td>
                     <td className="py-3 pr-4">
                       <span className="rounded-full bg-accent px-2.5 py-0.5 font-mono text-xs font-bold text-accent-foreground">
-                        +{tip.amount} G$
+                        {activeLedgerTab === 'received' ? '+' : '-'}{tip.amount} G$
                       </span>
                     </td>
                     <td className="whitespace-nowrap py-3 text-xs text-muted-foreground">

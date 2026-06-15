@@ -80,6 +80,18 @@ export async function getTips(creatorUsername: string): Promise<Tip[]> {
   return data as Tip[];
 }
 
+export async function getSentTips(senderAddress: string): Promise<Tip[]> {
+  const normalized = senderAddress.toLowerCase();
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('tipjar_tips')
+    .select('*')
+    .ilike('sender_address', normalized)
+    .order('created_at', { ascending: false });
+  if (error) return [];
+  return data as Tip[];
+}
+
 export async function getReceivedTipStats(creatorUsername: string): Promise<TipAggregate> {
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase

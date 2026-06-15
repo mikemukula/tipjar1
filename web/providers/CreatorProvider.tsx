@@ -35,6 +35,7 @@ export interface TipStats {
 interface CreatorContextValue {
   creator: Creator;
   tips: Tip[];
+  sentTips: Tip[];
   tipStats: TipStats;
   isLoading: boolean;
   walletAddress: `0x${string}` | '';
@@ -55,6 +56,7 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     username: '', wallet_address: '', name: '', bio: '', youtube: '', twitter: '',
   });
   const [tips, setTips] = useState<Tip[]>([]);
+  const [sentTips, setSentTips] = useState<Tip[]>([]);
   const [tipStats, setTipStats] = useState<TipStats>({
     totalReceived: 0,
     receivedCount: 0,
@@ -71,12 +73,16 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     // Reset state so a wallet switch never shows the previous wallet's data
     setCreator(emptyCreator);
     setTips([]);
+    setSentTips([]);
     setTipStats({ totalReceived: 0, receivedCount: 0, totalTipped: 0, sentCount: 0 });
 
     if (!walletAddress) { setIsLoading(false); return; }
     setIsLoading(true);
     (async () => {
       try {
+        const sentTipsRes = await fetch(`/api/tips?wallet=${walletAddress}`);
+        if (sentTipsRes.ok) setSentTips(await sentTipsRes.json());
+
         const res = await fetch(`/api/profile?wallet=${walletAddress}`);
         if (res.ok) {
           const profile = await res.json();
@@ -114,7 +120,7 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
 
   return (
     <CreatorContext.Provider value={{
-      creator, tips, tipStats, isLoading, walletAddress,
+      creator, tips, sentTips, tipStats, isLoading, walletAddress,
       setCreator, setTips, refreshTips, addTip,
     }}>
       {children}

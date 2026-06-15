@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTips, addTip } from '@/lib/db';
+import { getTips, getSentTips, addTip } from '@/lib/db';
 import { createPublicClient, defineChain, http } from 'viem';
 
 const celo = defineChain({
@@ -26,16 +26,17 @@ async function resolveSenderAddress(senderAddress?: string, txHash?: string | nu
   }
 }
 
-// GET /api/tips?username=foo
+// GET /api/tips?username=foo  OR  /api/tips?wallet=0x...
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const username = searchParams.get('username');
+  const wallet = searchParams.get('wallet');
 
-  if (!username) {
-    return NextResponse.json({ error: 'username param is required' }, { status: 400 });
+  if (!username && !wallet) {
+    return NextResponse.json({ error: 'username or wallet param is required' }, { status: 400 });
   }
 
-  const tips = await getTips(username);
+  const tips = username ? await getTips(username) : await getSentTips(wallet!);
   return NextResponse.json(tips);
 }
 
