@@ -25,6 +25,11 @@ export interface Tip {
   created_at?: string;
 }
 
+export interface TipAggregate {
+  total: number;
+  count: number;
+}
+
 export async function getCreator(username: string): Promise<Creator | null> {
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
@@ -73,6 +78,33 @@ export async function getTips(creatorUsername: string): Promise<Tip[]> {
     .order('created_at', { ascending: false });
   if (error) return [];
   return data as Tip[];
+}
+
+export async function getReceivedTipStats(creatorUsername: string): Promise<TipAggregate> {
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('tipjar_tips')
+    .select('amount')
+    .eq('creator_username', creatorUsername);
+
+  if (error || !data) return { total: 0, count: 0 };
+
+  const total = data.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  return { total, count: data.length };
+}
+
+export async function getSentTipStats(senderAddress: string): Promise<TipAggregate> {
+  const normalized = senderAddress.toLowerCase();
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from('tipjar_tips')
+    .select('amount')
+    .ilike('sender_address', normalized);
+
+  if (error || !data) return { total: 0, count: 0 };
+
+  const total = data.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  return { total, count: data.length };
 }
 
 export async function addTip(tip: Omit<Tip, 'id' | 'created_at'>): Promise<Tip | null> {

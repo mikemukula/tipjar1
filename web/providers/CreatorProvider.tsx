@@ -25,9 +25,17 @@ export interface Tip {
   created_at?: string;
 }
 
+export interface TipStats {
+  totalReceived: number;
+  receivedCount: number;
+  totalTipped: number;
+  sentCount: number;
+}
+
 interface CreatorContextValue {
   creator: Creator;
   tips: Tip[];
+  tipStats: TipStats;
   isLoading: boolean;
   walletAddress: `0x${string}` | '';
   setCreator: (c: Creator) => void;
@@ -47,6 +55,12 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     username: '', wallet_address: '', name: '', bio: '', youtube: '', twitter: '',
   });
   const [tips, setTips] = useState<Tip[]>([]);
+  const [tipStats, setTipStats] = useState<TipStats>({
+    totalReceived: 0,
+    receivedCount: 0,
+    totalTipped: 0,
+    sentCount: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // (Re)load the profile whenever the active wallet changes
@@ -57,6 +71,7 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     // Reset state so a wallet switch never shows the previous wallet's data
     setCreator(emptyCreator);
     setTips([]);
+    setTipStats({ totalReceived: 0, receivedCount: 0, totalTipped: 0, sentCount: 0 });
 
     if (!walletAddress) { setIsLoading(false); return; }
     setIsLoading(true);
@@ -68,6 +83,11 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
           setCreator(profile);
           const tipsRes = await fetch(`/api/tips?username=${profile.username}`);
           if (tipsRes.ok) setTips(await tipsRes.json());
+          const statsRes = await fetch(`/api/tips/stats?username=${profile.username}&wallet=${walletAddress}`);
+          if (statsRes.ok) setTipStats(await statsRes.json());
+        } else {
+          const statsRes = await fetch(`/api/tips/stats?wallet=${walletAddress}`);
+          if (statsRes.ok) setTipStats(await statsRes.json());
         }
       } finally {
         setIsLoading(false);
@@ -94,7 +114,7 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
 
   return (
     <CreatorContext.Provider value={{
-      creator, tips, isLoading, walletAddress,
+      creator, tips, tipStats, isLoading, walletAddress,
       setCreator, setTips, refreshTips, addTip,
     }}>
       {children}

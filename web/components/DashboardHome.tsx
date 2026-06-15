@@ -7,7 +7,7 @@ import { useCreator } from '@/providers/CreatorProvider';
 import { useGDollarBalance } from '@/hooks/useGDollarBalance';
 
 export default function DashboardHome() {
-  const { creator, tips, walletAddress } = useCreator();
+  const { creator, tips, tipStats, walletAddress } = useCreator();
   const { balance: gBalance, isLoading: balanceLoading } = useGDollarBalance(walletAddress || undefined);
   const [copied, setCopied] = useState(false);
 
@@ -20,8 +20,9 @@ export default function DashboardHome() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const totalTips = tips.reduce((sum, tip) => sum + Number(tip.amount), 0);
-  const avgTip = tips.length > 0 ? Math.round(totalTips / tips.length) : 0;
+  const avgTip = tipStats.receivedCount > 0
+    ? Math.round(tipStats.totalReceived / tipStats.receivedCount)
+    : 0;
 
   const balanceDisplay = balanceLoading && gBalance == null
     ? '…'
@@ -31,8 +32,8 @@ export default function DashboardHome() {
 
   const stats = [
     { label: 'Wallet balance', value: balanceDisplay, suffix: 'G$', live: true },
-    { label: 'Total received', value: totalTips.toLocaleString(), suffix: 'G$' },
-    { label: 'Tips', value: String(tips.length) },
+    { label: 'Total received', value: tipStats.totalReceived.toLocaleString(), suffix: 'G$' },
+    { label: 'Total tipped', value: tipStats.totalTipped.toLocaleString(), suffix: 'G$' },
     { label: 'Average tip', value: String(avgTip), suffix: 'G$' },
   ];
 

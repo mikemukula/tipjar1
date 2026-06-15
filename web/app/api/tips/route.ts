@@ -1,5 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTips, addTip } from '@/lib/db';
+import { createPublicClient, defineChain, http } from 'viem';
+
+const celo = defineChain({
+  id: 42220,
+  name: 'Celo',
+  nativeCurrency: { decimals: 18, name: 'CELO', symbol: 'CELO' },
+  rpcUrls: { default: { http: ['https://forno.celo.org'] } },
+});
+
+const publicClient = createPublicClient({
+  chain: celo,
+  transport: http('https://forno.celo.org'),
+});
+
+async function resolveSenderAddress(senderAddress?: string, txHash?: string | null) {
+  if (senderAddress && senderAddress.trim()) return senderAddress.toLowerCase();
+  if (!txHash) return '';
+
+  try {
+    const tx = await publicClient.getTransaction({ hash: txHash as `0x${string}` });
+    return tx.from.toLowerCase();
+  } catch {
+    return '';
+  }
+}
 
 // GET /api/tips?username=foo
 export async function GET(req: NextRequest) {
@@ -23,10 +48,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'creator_username and amount are required' }, { status: 400 });
   }
 
+  const resolvedSenderAddress = await resolveSenderAddress(sender_address, tx_hash);
+
   const tip = await addTip({
     creator_username,
     sender_name: sender_name || 'Anonymous Fan',
-    sender_address: sender_address || '',
+    sender_address: resolvedSenderAddress,
     amount: parseFloat(amount),
     message: message || '',
     tx_hash: tx_hash || null,

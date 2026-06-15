@@ -45,20 +45,20 @@ export default function TipPageView({ creatorInfo, onAddTip, isWidget = false }:
     e.preventDefault();
     if (activeAmount <= 0) return;
 
-    const hash = await sendTip({
+    const result = await sendTip({
       creatorUsername: creatorInfo.username,
       amountG$: activeAmount,
       message: message.trim() || '',
     });
 
-    if (hash && onAddTip) {
+    if (result && onAddTip) {
       onAddTip({
         creator_username: creatorInfo.username,
         sender_name: senderName.trim() || 'Anonymous Fan',
-        sender_address: '',
+        sender_address: result.senderAddress,
         amount: activeAmount,
         message: message.trim() || 'Supported the creator!',
-        tx_hash: hash,
+        tx_hash: result.txHash,
       });
     }
   };
