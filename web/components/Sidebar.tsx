@@ -1,20 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Eye, Info, LogOut, ArrowUpRight, Share2, Settings } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, Eye, Info, LogOut, ArrowUpRight, Share2, Settings, Trophy } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useCreator } from '@/providers/CreatorProvider';
 
 export default function Sidebar() {
   const { logout } = usePrivy();
   const pathname = usePathname();
+  const router = useRouter();
   const { creator: creatorInfo } = useCreator();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   const menuItems = [
     { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
     { href: '/share',        label: 'Share',        icon: Share2 },
     { href: '/preview',      label: 'Tip Page',     icon: Eye },
+    { href: '/leaderboard',  label: 'Leaderboard',  icon: Trophy },
     { href: '/settings',     label: 'Settings',     icon: Settings },
     { href: '/how-it-works', label: 'How it Works', icon: Info },
   ];
@@ -79,7 +86,7 @@ export default function Sidebar() {
             </p>
           </div>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             title="Sign out"
             className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >

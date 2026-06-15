@@ -9,6 +9,7 @@ import {
   ArrowRight, ArrowUpRight, Sun, Moon, BadgeCheck, Heart,
   Zap, QrCode, Code, Wallet, ShieldCheck, Globe, Menu, X,
 } from 'lucide-react';
+import CreatorsLeaderboard from '@/components/CreatorsLeaderboard';
 
 /* ─── Fake ticker data ──────────────────────────────────────── */
 
@@ -98,6 +99,7 @@ export default function LandingPage() {
             {[
               ['Features', '#features'],
               ['How it works', '#how-it-works'],
+              ['Leaderboard', '#leaderboard'],
               ['Contract', '#contract'],
             ].map(([label, href]) => (
               <a
@@ -142,6 +144,7 @@ export default function LandingPage() {
             {[
               ['Features', '#features'],
               ['How it works', '#how-it-works'],
+              ['Leaderboard', '#leaderboard'],
               ['Contract', '#contract'],
             ].map(([label, href]) => (
               <a
@@ -298,6 +301,8 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      <CreatorsLeaderboard />
 
       {/* ─── How it works ───────────────────────────────────── */}
       <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-24 max-md:py-16">
