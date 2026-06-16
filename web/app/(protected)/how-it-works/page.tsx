@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink } from 'lucide-react';
+import { ShieldCheck, Wallet, Zap } from 'lucide-react';
 
 const STEPS = [
   {
@@ -20,58 +20,74 @@ const STEPS = [
   },
 ];
 
-const CONTRACTS = [
+const HIGHLIGHTS = [
   {
-    label: 'TipJarRegistry',
-    address: '0x9c69aa76f0D565eC514563E36bf9371ba7E74F05',
+    icon: Zap,
+    title: 'Instant flow',
+    desc: 'Tips move wallet-to-wallet in seconds so creators do not wait for payouts.',
   },
   {
-    label: 'G$ token (Celo)',
-    address: '0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A',
+    icon: Wallet,
+    title: 'Creator owned funds',
+    desc: 'TipJar never custodians money. Fans send directly to the creator wallet.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Transparent by design',
+    desc: 'Every tip is on-chain and verifiable on Celo for full transparency.',
   },
 ];
 
 export default function HowItWorksPage() {
   return (
-    <div className="mx-auto flex max-w-3xl animate-fade-up flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl animate-fade-up flex-col gap-8">
       <div>
-        <h2 className="font-display text-2xl font-bold tracking-tight">How it works</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          How it works
+        </span>
+        <h2 className="mt-2 font-display text-3xl font-bold tracking-tight max-md:text-2xl">
+          From signup to your first tip
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Direct creator support with G$ — Universal Basic Income on Celo.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-        {STEPS.map((s) => (
-          <div key={s.n} className="rounded-xl border border-line bg-card p-5">
-            <span className="font-mono text-xs font-bold text-muted-foreground/50">{s.n}</span>
-            <h3 className="mt-2 font-display text-[15px] font-semibold">{s.title}</h3>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{s.desc}</p>
+      <div className="grid gap-4">
+        {STEPS.map((s, i) => (
+          <div
+            key={s.n}
+            className="grid grid-cols-[auto_1fr] gap-4 rounded-2xl border border-line bg-card p-5 max-md:grid-cols-1"
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-xs font-bold text-accent">
+                {s.n}
+              </span>
+              {i < STEPS.length - 1 && <span className="mt-8 hidden h-10 w-px bg-line md:block" />}
+            </div>
+            <div>
+              <h3 className="font-display text-base font-semibold">{s.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      <section className="rounded-xl border border-line bg-card p-6">
-        <h3 className="font-display text-[15px] font-semibold">Smart contracts</h3>
-        <p className="mt-1 text-[13px] text-muted-foreground">
-          Tips flow wallet-to-wallet — the contract never holds funds.
-        </p>
-        <div className="mt-4 flex flex-col">
-          {CONTRACTS.map((c) => (
-            <a
-              key={c.address}
-              href={`https://celoscan.io/address/${c.address}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center justify-between gap-4 border-t border-line py-3 first:border-t-0 max-md:flex-col max-md:items-start max-md:gap-1"
-            >
-              <span className="shrink-0 text-xs font-semibold text-muted-foreground">{c.label}</span>
-              <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground transition-colors group-hover:text-foreground">
-                {c.address}
-                <ExternalLink size={11} className="opacity-50" />
-              </span>
-            </a>
-          ))}
+      <section className="rounded-2xl border border-line bg-card p-6">
+        <h3 className="font-display text-base font-semibold">Why creators trust TipJar</h3>
+        <div className="mt-4 grid grid-cols-3 gap-3 max-md:grid-cols-1">
+          {HIGHLIGHTS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.title} className="rounded-xl border border-line bg-background p-4">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                  <Icon size={16} />
+                </div>
+                <p className="mt-3 text-sm font-semibold">{item.title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>
