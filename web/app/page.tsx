@@ -9,6 +9,7 @@ import {
   ArrowRight, ArrowUpRight, Sun, Moon, BadgeCheck, Heart,
   Zap, QrCode, Code, Wallet, ShieldCheck, Globe, Menu, X,
 } from 'lucide-react';
+import CreatorsLeaderboard from '@/components/CreatorsLeaderboard';
 
 /* ─── Fake ticker data ──────────────────────────────────────── */
 
@@ -86,7 +87,7 @@ export default function LandingPage() {
 
       {/* ─── Navbar ─────────────────────────────────────────── */}
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-background/75 backdrop-blur-md">
-        <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+        <nav className="mx-auto flex h-16 w-full max-w-[min(1680px,94vw)] items-center justify-between px-6 2xl:px-10 max-lg:max-w-6xl max-lg:px-5">
           <Link href="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent font-mono text-sm font-bold text-accent-foreground">
               G$
@@ -98,6 +99,7 @@ export default function LandingPage() {
             {[
               ['Features', '#features'],
               ['How it works', '#how-it-works'],
+              ['Leaderboard', '#leaderboard'],
               ['Contract', '#contract'],
             ].map(([label, href]) => (
               <a
@@ -142,6 +144,7 @@ export default function LandingPage() {
             {[
               ['Features', '#features'],
               ['How it works', '#how-it-works'],
+              ['Leaderboard', '#leaderboard'],
               ['Contract', '#contract'],
             ].map(([label, href]) => (
               <a
@@ -165,9 +168,9 @@ export default function LandingPage() {
       </header>
 
       {/* ─── Hero ───────────────────────────────────────────── */}
-      <section className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-12 px-5 pt-36 pb-20 max-lg:grid-cols-1 max-lg:pt-30 max-lg:pb-12">
-        <div className="animate-fade-up">
-          <h1 className="font-display text-[56px] leading-[1.04] font-bold tracking-tight max-md:text-4xl">
+      <section className="mx-auto grid w-full max-w-[min(1680px,94vw)] grid-cols-[minmax(0,1fr)_minmax(460px,1fr)] items-center gap-16 px-6 pt-36 pb-20 2xl:gap-24 2xl:px-10 max-lg:grid-cols-1 max-lg:max-w-6xl max-lg:gap-12 max-lg:px-5 max-lg:pt-30 max-lg:pb-12">
+        <div className="animate-fade-up 2xl:pr-10">
+          <h1 className="max-w-[15ch] font-display text-[clamp(2.7rem,4.8vw,5.8rem)] leading-[1.02] font-bold tracking-tight max-md:text-4xl">
             Get tipped in{' '}
             <span className="relative inline-block">
               <span className="relative z-10">G$</span>
@@ -177,7 +180,7 @@ export default function LandingPage() {
             Directly. Instantly.
           </h1>
 
-          <p className="mt-5 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+          <p className="mt-5 max-w-2xl text-[18px] leading-relaxed text-muted-foreground max-md:text-[17px]">
             The tipping platform for creators on Celo. Fans send GoodDollar straight
             to your wallet — no middlemen, no fees, no payout delays.
           </p>
@@ -214,9 +217,9 @@ export default function LandingPage() {
         </div>
 
         {/* Hero visual — mock tip card with floating toasts */}
-        <div className="relative flex justify-center max-lg:hidden">
+        <div className="relative flex justify-end max-lg:hidden">
           {/* Mock card */}
-          <div className="w-85 animate-float-slow rounded-2xl border border-line bg-card p-6 shadow-xl">
+          <div className="w-full max-w-[560px] animate-float-slow rounded-2xl border border-line bg-card p-6 shadow-xl 2xl:max-w-[620px] 2xl:p-7">
             <div className="flex flex-col items-center text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent font-display text-xl font-bold text-accent-foreground">
                 N
@@ -251,7 +254,7 @@ export default function LandingPage() {
           </div>
 
           {/* Floating toasts */}
-          <div className="absolute -left-4 top-10 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg" style={{ animationDelay: '0.5s' }}>
+          <div className="absolute -left-8 top-8 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg 2xl:-left-14" style={{ animationDelay: '0.5s' }}>
             <div className="flex items-center gap-2.5">
               <Heart size={14} className="text-danger" />
               <div>
@@ -260,7 +263,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="absolute -right-2 top-40 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg" style={{ animationDelay: '1.8s' }}>
+          <div className="absolute -right-3 top-44 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg 2xl:-right-7" style={{ animationDelay: '1.8s' }}>
             <div className="flex items-center gap-2.5">
               <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-[10px] font-bold text-accent-foreground">
                 +100 G$
@@ -268,7 +271,7 @@ export default function LandingPage() {
               <p className="text-xs font-bold">from Kev_Celo</p>
             </div>
           </div>
-          <div className="absolute -bottom-4 left-8 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg" style={{ animationDelay: '3s' }}>
+          <div className="absolute -bottom-5 left-12 animate-float rounded-xl border border-line bg-card px-4 py-2.5 shadow-lg 2xl:left-18" style={{ animationDelay: '3s' }}>
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
               <p className="font-mono text-[10px] font-semibold text-muted-foreground">
@@ -298,6 +301,8 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      <CreatorsLeaderboard />
 
       {/* ─── How it works ───────────────────────────────────── */}
       <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-24 max-md:py-16">

@@ -23,7 +23,7 @@ interface UseSendTipResult {
     creatorUsername: string;
     amountG$: number;
     message: string;
-  }) => Promise<`0x${string}` | null>;
+  }) => Promise<{ txHash: `0x${string}`; senderAddress: `0x${string}` } | null>;
   status: TipStatus;
   txHash: `0x${string}` | null;
   error: string | null;
@@ -52,7 +52,7 @@ export function useSendTip(): UseSendTipResult {
     creatorUsername: string;
     amountG$: number;
     message: string;
-  }): Promise<`0x${string}` | null> => {
+  }): Promise<{ txHash: `0x${string}`; senderAddress: `0x${string}` } | null> => {
     if (!walletClient || !publicClient) {
       setError('Wallet not connected');
       setStatus('error');
@@ -96,7 +96,7 @@ export function useSendTip(): UseSendTipResult {
 
       setTxHash(tipTx);
       setStatus('success');
-      return tipTx;
+      return { txHash: tipTx, senderAddress: account };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Transaction failed';
       // Surface friendly errors
